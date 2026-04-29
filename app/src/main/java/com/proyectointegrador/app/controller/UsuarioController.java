@@ -3,7 +3,9 @@ package com.proyectointegrador.app.controller;
 import com.proyectointegrador.app.model.Usuario;
 import com.proyectointegrador.app.service.  UsuarioService;
 
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,12 +30,30 @@ public class UsuarioController {
     }
 
 
-    @PostMapping("/login")
-public Usuario login(@RequestBody Usuario usuario) {
-    return usuarioService.login(usuario.getEmail(), usuario.getPassword());
+    
+@PostMapping("/login")
+public ResponseEntity<?> login(@RequestBody Usuario usuario) {
 
+    Usuario usuarioEncontrado = usuarioService.buscarPorEmail(usuario.getEmail());
+
+    // ❌ Usuario no existe
+    if (usuarioEncontrado == null) {
+        return ResponseEntity
+                .status(404)
+                .body("Usuario no existe");
+    }
+
+    // ❌ Contraseña incorrecta
+    if (!usuarioEncontrado.getPassword().equals(usuario.getPassword())) {
+        return ResponseEntity
+                .status(401)
+                .body("Contraseña incorrecta");
+    }
+
+    // ✅ Login correcto
+    return ResponseEntity.ok(usuarioEncontrado);
+}
    
 }
 
 
-}
