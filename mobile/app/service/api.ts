@@ -32,6 +32,6 @@ export const loginUser = async (email: string, password: string) => {
 
   } catch (error) {
     console.log("ERROR COMPLETO:", error);
-    return { error: true, message: "Error de conexión" };
+    return { error: true, message: "Error des conexión" };
   }
 };
