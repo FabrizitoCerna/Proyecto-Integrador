@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity,
-  FlatList, StyleSheet, Alert, ActivityIndicator, ScrollView
+  StyleSheet, Alert, ActivityIndicator, ScrollView, Modal
 } from 'react-native';
 
 const API = 'http://192.168.18.163:8080/tecnicos';
@@ -15,6 +15,13 @@ export default function HomeScreen() {
   const [estado, setEstado] = useState('pendiente');
   const [msg, setMsg] = useState('');
   const [msgTipo, setMsgTipo] = useState('');
+
+  const [modalVisible, setModalVisible] = useState(false);
+  const [editId, setEditId] = useState<number | null>(null);
+  const [editNombre, setEditNombre] = useState('');
+  const [editEspecialidad, setEditEspecialidad] = useState('');
+  const [editTelefono, setEditTelefono] = useState('');
+  const [editEstado, setEditEstado] = useState('pendiente');
 
   useEffect(() => { cargarTecnicos(); }, []);
 
@@ -59,6 +66,38 @@ export default function HomeScreen() {
     }
   }
 
+  function abrirEditar(t: any) {
+    setEditId(t.id);
+    setEditNombre(t.nombre);
+    setEditEspecialidad(t.especialidad);
+    setEditTelefono(t.telefono);
+    setEditEstado(t.estado);
+    setModalVisible(true);
+  }
+
+  async function guardarEdicion() {
+    if (!editNombre || !editEspecialidad || !editTelefono) {
+      mostrarMsg('Completa todos los campos.', 'error');
+      return;
+    }
+    try {
+      const res = await fetch(`${API}/${editId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombre: editNombre, especialidad: editEspecialidad, telefono: editTelefono, estado: editEstado, activo: true })
+      });
+      if (res.ok) {
+        mostrarMsg('Técnico actualizado correctamente.', 'ok');
+        setModalVisible(false);
+        cargarTecnicos();
+      } else {
+        mostrarMsg('Error al actualizar.', 'error');
+      }
+    } catch (e) {
+      mostrarMsg('No se pudo conectar con el servidor.', 'error');
+    }
+  }
+
   async function verificar(id: number) {
     try {
       await fetch(`${API}/${id}/estado?estado=verificado`, { method: 'PUT' });
@@ -69,32 +108,39 @@ export default function HomeScreen() {
   }
 
   async function eliminar(id: number) {
-    Alert.alert('Confirmar', '¿Eliminar este técnico?', [
-      { text: 'Cancelar', style: 'cancel' },
-      {
-        text: 'Eliminar', style: 'destructive', onPress: async () => {
-          await fetch(`${API}/${id}`, { method: 'DELETE' });
-          cargarTecnicos();
+    if (typeof window !== 'undefined') {
+      // Web: usar confirm del navegador
+      const confirmado = window.confirm('¿Eliminar este técnico?');
+      if (!confirmado) return;
+      await fetch(`${API}/${id}`, { method: 'DELETE' });
+      cargarTecnicos();
+    } else {
+      // Móvil: usar Alert de React Native
+      Alert.alert('Confirmar', '¿Eliminar este técnico?', [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Eliminar', style: 'destructive', onPress: async () => {
+            await fetch(`${API}/${id}`, { method: 'DELETE' });
+            cargarTecnicos();
+          }
         }
-      }
-    ]);
+      ]);
+    }
   }
 
-  const badgeColor = (estado: string) => {
-    if (estado === 'verificado') return '#27ae60';
-    if (estado === 'suspendido') return '#e74c3c';
+  const badgeColor = (e: string) => {
+    if (e === 'verificado') return '#27ae60';
+    if (e === 'suspendido') return '#e74c3c';
     return '#f39c12';
   };
 
   return (
     <ScrollView style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerText}>🔧 Formalización y Seguimiento de Técnicos</Text>
       </View>
 
       <View style={styles.inner}>
-        {/* Mensaje */}
         {msg !== '' && (
           <View style={[styles.msg, msgTipo === 'ok' ? styles.msgOk : styles.msgError]}>
             <Text style={msgTipo === 'ok' ? styles.msgOkText : styles.msgErrorText}>{msg}</Text>
@@ -148,6 +194,9 @@ export default function HomeScreen() {
                   <TouchableOpacity style={styles.btnSuccess} onPress={() => verificar(t.id)}>
                     <Text style={styles.btnText}>Verificar</Text>
                   </TouchableOpacity>
+                  <TouchableOpacity style={styles.btnWarning} onPress={() => abrirEditar(t)}>
+                    <Text style={styles.btnText}>Editar</Text>
+                  </TouchableOpacity>
                   <TouchableOpacity style={styles.btnDanger} onPress={() => eliminar(t.id)}>
                     <Text style={styles.btnText}>Eliminar</Text>
                   </TouchableOpacity>
@@ -157,6 +206,42 @@ export default function HomeScreen() {
           )}
         </View>
       </View>
+
+      {/* Modal Editar */}
+      <Modal visible={modalVisible} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <ScrollView style={{ width: '100%' }} contentContainerStyle={{ alignItems: 'center', padding: 20 }}>
+            <View style={styles.modalCard}>
+              <Text style={styles.cardTitle}>Editar Técnico</Text>
+              <Text style={styles.label}>Nombre</Text>
+              <TextInput style={styles.input} value={editNombre} onChangeText={setEditNombre} />
+              <Text style={styles.label}>Especialidad</Text>
+              <TextInput style={styles.input} value={editEspecialidad} onChangeText={setEditEspecialidad} />
+              <Text style={styles.label}>Teléfono</Text>
+              <TextInput style={styles.input} value={editTelefono} onChangeText={setEditTelefono} keyboardType="phone-pad" />
+              <Text style={styles.label}>Estado</Text>
+              <View style={styles.estadoRow}>
+                {['pendiente','verificado','suspendido'].map(op => (
+                  <TouchableOpacity
+                    key={op}
+                    style={[styles.estadoBtn, editEstado === op && styles.estadoBtnActive]}
+                    onPress={() => setEditEstado(op)}>
+                    <Text style={[styles.estadoBtnText, editEstado === op && styles.estadoBtnTextActive]}>
+                      {op.charAt(0).toUpperCase() + op.slice(1)}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+              <TouchableOpacity style={styles.btnPrimary} onPress={guardarEdicion}>
+                <Text style={styles.btnText}>Guardar cambios</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.btnDanger, { marginTop: 8 }]} onPress={() => setModalVisible(false)}>
+                <Text style={styles.btnText}>Cancelar</Text>
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
+        </View>
+      </Modal>
     </ScrollView>
   );
 }
@@ -182,6 +267,7 @@ const styles = StyleSheet.create({
   estadoBtnTextActive: { color: 'white', fontWeight: 'bold' },
   btnPrimary: { backgroundColor: '#2c3e50', padding: 14, borderRadius: 6, alignItems: 'center', marginTop: 4 },
   btnSuccess: { backgroundColor: '#27ae60', padding: 8, borderRadius: 6, flex: 1, alignItems: 'center', marginRight: 6 },
+  btnWarning: { backgroundColor: '#f39c12', padding: 8, borderRadius: 6, flex: 1, alignItems: 'center', marginRight: 6 },
   btnDanger: { backgroundColor: '#e74c3c', padding: 8, borderRadius: 6, flex: 1, alignItems: 'center' },
   btnText: { color: 'white', fontWeight: 'bold', fontSize: 13 },
   tecnicoCard: { borderWidth: 1, borderColor: '#eee', borderRadius: 8, padding: 12, marginBottom: 10 },
@@ -191,4 +277,6 @@ const styles = StyleSheet.create({
   badgeText: { color: 'white', fontSize: 12, fontWeight: 'bold' },
   actions: { flexDirection: 'row', marginTop: 8 },
   emptyText: { textAlign: 'center', color: '#888', fontSize: 14 },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center' },
+  modalCard: { backgroundColor: 'white', borderRadius: 10, padding: 20, width: '90%', maxWidth: 400 },
 });

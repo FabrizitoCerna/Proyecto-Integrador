@@ -39,4 +39,10 @@ public class TecnicoController {
     public void eliminar(@PathVariable int id) {
         tecnicoService.eliminar(id);
     }
+
+    @PutMapping("/{id}")
+    public Tecnico actualizar(@PathVariable int id, @RequestBody Tecnico tecnico) {
+        tecnico.setId(id);
+        return tecnicoService.guardar(tecnico);
+    }
 }
