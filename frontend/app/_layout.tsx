@@ -1,8 +1,5 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import 'react-native-reanimated';
 import { useState } from 'react';
+import 'react-native-reanimated';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import Login from './login';
@@ -17,13 +14,17 @@ export default function RootLayout() {
   const colorScheme = useColorScheme();
   const [usuario, setUsuario] = useState<any>(null);
 
+  function handleLogout() {
+    setUsuario(null);
+  }
+
   if (!usuario) {
     return <Login onLogin={(u) => setUsuario(u)} />;
   }
 
   if (usuario.tipo === 'admin') {
-    return <AdminScreen />;
+    return <AdminScreen onLogout={handleLogout} usuario={usuario} />;
   }
 
-  return <UsuarioScreen />;
+  return <UsuarioScreen onLogout={handleLogout} usuario={usuario} />;
 }

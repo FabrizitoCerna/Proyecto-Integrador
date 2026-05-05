@@ -1,3 +1,4 @@
+declare const window: any;
 import { useState, useEffect } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity,
@@ -6,7 +7,12 @@ import {
 
 const API = 'http://192.168.18.163:8080/tecnicos';
 
-export default function HomeScreen() {
+interface Props {
+  onLogout?: () => void;
+  usuario?: any;
+}
+
+export default function HomeScreen({ onLogout, usuario }: Props) {
   const [tecnicos, setTecnicos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [nombre, setNombre] = useState('');
@@ -15,6 +21,7 @@ export default function HomeScreen() {
   const [estado, setEstado] = useState('pendiente');
   const [msg, setMsg] = useState('');
   const [msgTipo, setMsgTipo] = useState('');
+  const [menuVisible, setMenuVisible] = useState(false);
 
   const [modalVisible, setModalVisible] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
@@ -109,13 +116,11 @@ export default function HomeScreen() {
 
   async function eliminar(id: number) {
     if (typeof window !== 'undefined') {
-      // Web: usar confirm del navegador
       const confirmado = window.confirm('¿Eliminar este técnico?');
       if (!confirmado) return;
       await fetch(`${API}/${id}`, { method: 'DELETE' });
       cargarTecnicos();
     } else {
-      // Móvil: usar Alert de React Native
       Alert.alert('Confirmar', '¿Eliminar este técnico?', [
         { text: 'Cancelar', style: 'cancel' },
         {
@@ -135,121 +140,161 @@ export default function HomeScreen() {
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerText}>🔧 Formalización y Seguimiento de Técnicos</Text>
-      </View>
-
-      <View style={styles.inner}>
-        {msg !== '' && (
-          <View style={[styles.msg, msgTipo === 'ok' ? styles.msgOk : styles.msgError]}>
-            <Text style={msgTipo === 'ok' ? styles.msgOkText : styles.msgErrorText}>{msg}</Text>
+    <View style={{ flex: 1 }}>
+      <ScrollView style={styles.container}>
+        {/* Header */}
+        <View style={styles.header}>
+          <View style={styles.headerRow}>
+            <Text style={styles.headerText}>🔧 Formalización y Seguimiento de Técnicos</Text>
+            <TouchableOpacity onPress={() => setMenuVisible(true)}>
+              <Text style={styles.menuIcon}>☰</Text>
+            </TouchableOpacity>
           </View>
-        )}
-
-        {/* Formulario */}
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Registrar Técnico</Text>
-          <Text style={styles.label}>Nombre</Text>
-          <TextInput style={styles.input} placeholder="Nombre completo" value={nombre} onChangeText={setNombre} />
-          <Text style={styles.label}>Especialidad</Text>
-          <TextInput style={styles.input} placeholder="Ej: Electricista, Gasfitero, Limpieza" value={especialidad} onChangeText={setEspecialidad} />
-          <Text style={styles.label}>Teléfono</Text>
-          <TextInput style={styles.input} placeholder="Ej: 987654321" value={telefono} onChangeText={setTelefono} keyboardType="phone-pad" />
-          <Text style={styles.label}>Estado</Text>
-          <View style={styles.estadoRow}>
-            {['pendiente','verificado','suspendido'].map(op => (
-              <TouchableOpacity
-                key={op}
-                style={[styles.estadoBtn, estado === op && styles.estadoBtnActive]}
-                onPress={() => setEstado(op)}>
-                <Text style={[styles.estadoBtnText, estado === op && styles.estadoBtnTextActive]}>
-                  {op.charAt(0).toUpperCase() + op.slice(1)}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-          <TouchableOpacity style={styles.btnPrimary} onPress={registrarTecnico}>
-            <Text style={styles.btnText}>Registrar Técnico</Text>
-          </TouchableOpacity>
         </View>
 
-        {/* Lista */}
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Lista de Técnicos</Text>
-          {loading ? (
-            <ActivityIndicator size="large" color="#2c3e50" />
-          ) : tecnicos.length === 0 ? (
-            <Text style={styles.emptyText}>No hay técnicos registrados</Text>
-          ) : (
-            tecnicos.map((t: any) => (
-              <View key={t.id} style={styles.tecnicoCard}>
-                <Text style={styles.tecNombre}>{t.nombre}</Text>
-                <Text style={styles.tecInfo}>📋 {t.especialidad}</Text>
-                <Text style={styles.tecInfo}>📞 {t.telefono}</Text>
-                <View style={[styles.badge, { backgroundColor: badgeColor(t.estado) }]}>
-                  <Text style={styles.badgeText}>{t.estado}</Text>
-                </View>
-                <View style={styles.actions}>
-                  <TouchableOpacity style={styles.btnSuccess} onPress={() => verificar(t.id)}>
-                    <Text style={styles.btnText}>Verificar</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity style={styles.btnWarning} onPress={() => abrirEditar(t)}>
-                    <Text style={styles.btnText}>Editar</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity style={styles.btnDanger} onPress={() => eliminar(t.id)}>
-                    <Text style={styles.btnText}>Eliminar</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            ))
-          )}
-        </View>
-      </View>
-
-      {/* Modal Editar */}
-      <Modal visible={modalVisible} transparent animationType="slide">
-        <View style={styles.modalOverlay}>
-          <ScrollView style={{ width: '100%' }} contentContainerStyle={{ alignItems: 'center', padding: 20 }}>
-            <View style={styles.modalCard}>
-              <Text style={styles.cardTitle}>Editar Técnico</Text>
-              <Text style={styles.label}>Nombre</Text>
-              <TextInput style={styles.input} value={editNombre} onChangeText={setEditNombre} />
-              <Text style={styles.label}>Especialidad</Text>
-              <TextInput style={styles.input} value={editEspecialidad} onChangeText={setEditEspecialidad} />
-              <Text style={styles.label}>Teléfono</Text>
-              <TextInput style={styles.input} value={editTelefono} onChangeText={setEditTelefono} keyboardType="phone-pad" />
-              <Text style={styles.label}>Estado</Text>
-              <View style={styles.estadoRow}>
-                {['pendiente','verificado','suspendido'].map(op => (
-                  <TouchableOpacity
-                    key={op}
-                    style={[styles.estadoBtn, editEstado === op && styles.estadoBtnActive]}
-                    onPress={() => setEditEstado(op)}>
-                    <Text style={[styles.estadoBtnText, editEstado === op && styles.estadoBtnTextActive]}>
-                      {op.charAt(0).toUpperCase() + op.slice(1)}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-              <TouchableOpacity style={styles.btnPrimary} onPress={guardarEdicion}>
-                <Text style={styles.btnText}>Guardar cambios</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={[styles.btnDanger, { marginTop: 8 }]} onPress={() => setModalVisible(false)}>
-                <Text style={styles.btnText}>Cancelar</Text>
-              </TouchableOpacity>
+        <View style={styles.inner}>
+          {msg !== '' && (
+            <View style={[styles.msg, msgTipo === 'ok' ? styles.msgOk : styles.msgError]}>
+              <Text style={msgTipo === 'ok' ? styles.msgOkText : styles.msgErrorText}>{msg}</Text>
             </View>
-          </ScrollView>
+          )}
+
+          {/* Formulario */}
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Registrar Técnico</Text>
+            <Text style={styles.label}>Nombre</Text>
+            <TextInput style={styles.input} placeholder="Nombre completo" value={nombre} onChangeText={setNombre} />
+            <Text style={styles.label}>Especialidad</Text>
+            <TextInput style={styles.input} placeholder="Ej: Electricista, Gasfitero, Limpieza" value={especialidad} onChangeText={setEspecialidad} />
+            <Text style={styles.label}>Teléfono</Text>
+            <TextInput style={styles.input} placeholder="Ej: 987654321" value={telefono} onChangeText={setTelefono} keyboardType="phone-pad" />
+            <Text style={styles.label}>Estado</Text>
+            <View style={styles.estadoRow}>
+              {['pendiente','verificado','suspendido'].map(op => (
+                <TouchableOpacity
+                  key={op}
+                  style={[styles.estadoBtn, estado === op && styles.estadoBtnActive]}
+                  onPress={() => setEstado(op)}>
+                  <Text style={[styles.estadoBtnText, estado === op && styles.estadoBtnTextActive]}>
+                    {op.charAt(0).toUpperCase() + op.slice(1)}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+            <TouchableOpacity style={styles.btnPrimary} onPress={registrarTecnico}>
+              <Text style={styles.btnText}>Registrar Técnico</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Lista */}
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Lista de Técnicos</Text>
+            {loading ? (
+              <ActivityIndicator size="large" color="#2c3e50" />
+            ) : tecnicos.length === 0 ? (
+              <Text style={styles.emptyText}>No hay técnicos registrados</Text>
+            ) : (
+              tecnicos.map((t: any) => (
+                <View key={t.id} style={styles.tecnicoCard}>
+                  <Text style={styles.tecNombre}>{t.nombre}</Text>
+                  <Text style={styles.tecInfo}>📋 {t.especialidad}</Text>
+                  <Text style={styles.tecInfo}>📞 {t.telefono}</Text>
+                  <View style={[styles.badge, { backgroundColor: badgeColor(t.estado) }]}>
+                    <Text style={styles.badgeText}>{t.estado}</Text>
+                  </View>
+                  <View style={styles.actions}>
+                    <TouchableOpacity style={styles.btnSuccess} onPress={() => verificar(t.id)}>
+                      <Text style={styles.btnText}>Verificar</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.btnWarning} onPress={() => abrirEditar(t)}>
+                      <Text style={styles.btnText}>Editar</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.btnDanger} onPress={() => eliminar(t.id)}>
+                      <Text style={styles.btnText}>Eliminar</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              ))
+            )}
+          </View>
+        </View>
+
+        {/* Modal Editar */}
+        <Modal visible={modalVisible} transparent animationType="slide">
+          <View style={styles.modalOverlay}>
+            <ScrollView style={{ width: '100%' }} contentContainerStyle={{ alignItems: 'center', padding: 20 }}>
+              <View style={styles.modalCard}>
+                <Text style={styles.cardTitle}>Editar Técnico</Text>
+                <Text style={styles.label}>Nombre</Text>
+                <TextInput style={styles.input} value={editNombre} onChangeText={setEditNombre} />
+                <Text style={styles.label}>Especialidad</Text>
+                <TextInput style={styles.input} value={editEspecialidad} onChangeText={setEditEspecialidad} />
+                <Text style={styles.label}>Teléfono</Text>
+                <TextInput style={styles.input} value={editTelefono} onChangeText={setEditTelefono} keyboardType="phone-pad" />
+                <Text style={styles.label}>Estado</Text>
+                <View style={styles.estadoRow}>
+                  {['pendiente','verificado','suspendido'].map(op => (
+                    <TouchableOpacity
+                      key={op}
+                      style={[styles.estadoBtn, editEstado === op && styles.estadoBtnActive]}
+                      onPress={() => setEditEstado(op)}>
+                      <Text style={[styles.estadoBtnText, editEstado === op && styles.estadoBtnTextActive]}>
+                        {op.charAt(0).toUpperCase() + op.slice(1)}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+                <TouchableOpacity style={styles.btnPrimary} onPress={guardarEdicion}>
+                  <Text style={styles.btnText}>Guardar cambios</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={[styles.btnDanger, { marginTop: 8 }]} onPress={() => setModalVisible(false)}>
+                  <Text style={styles.btnText}>Cancelar</Text>
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
+          </View>
+        </Modal>
+      </ScrollView>
+
+      {/* Menú lateral */}
+      <Modal visible={menuVisible} transparent animationType="slide">
+        <View style={styles.drawerOverlay}>
+          <View style={styles.drawer}>
+            {/* Flecha cerrar */}
+            <TouchableOpacity onPress={() => setMenuVisible(false)} style={styles.drawerClose}>
+              <Text style={styles.drawerCloseText}>←</Text>
+            </TouchableOpacity>
+
+            {/* Info usuario */}
+            <View style={styles.drawerUser}>
+              <Text style={styles.drawerUserText}>
+                👤 ¡Hola, {usuario?.nombre || 'Admin'}!
+              </Text>
+            </View>
+
+            {/* Cerrar sesión */}
+            <TouchableOpacity style={styles.drawerLogout} onPress={() => {
+              setMenuVisible(false);
+              if (onLogout) onLogout();
+            }}>
+              <Text style={styles.drawerLogoutText}>⎋ Cerrar sesión</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Área oscura para cerrar */}
+          <TouchableOpacity style={styles.drawerBg} onPress={() => setMenuVisible(false)} />
         </View>
       </Modal>
-    </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f4f6f9' },
   header: { backgroundColor: '#2c3e50', padding: 20, paddingTop: 50 },
-  headerText: { color: 'white', fontSize: 18, fontWeight: 'bold' },
+  headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  headerText: { color: 'white', fontSize: 16, fontWeight: 'bold', flex: 1 },
+  menuIcon: { color: 'white', fontSize: 24, paddingLeft: 12 },
   inner: { padding: 16 },
   msg: { padding: 12, borderRadius: 6, marginBottom: 12 },
   msgOk: { backgroundColor: '#d4edda' },
@@ -279,4 +324,13 @@ const styles = StyleSheet.create({
   emptyText: { textAlign: 'center', color: '#888', fontSize: 14 },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center' },
   modalCard: { backgroundColor: 'white', borderRadius: 10, padding: 20, width: '90%', maxWidth: 400 },
+  drawerOverlay: { flex: 1, flexDirection: 'row' },
+  drawer: { width: 260, backgroundColor: '#1a252f', paddingTop: 50, padding: 20 },
+  drawerClose: { marginBottom: 24 },
+  drawerCloseText: { color: 'white', fontSize: 24 },
+  drawerUser: { marginBottom: 32 },
+  drawerUserText: { color: 'white', fontSize: 16, fontWeight: 'bold' },
+  drawerLogout: { paddingVertical: 12 },
+  drawerLogoutText: { color: '#e74c3c', fontSize: 15, fontWeight: 'bold' },
+  drawerBg: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)' },
 });
