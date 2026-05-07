@@ -108,6 +108,7 @@ CREATE TABLE `usuarios` (
   `Telefono_contacto` varchar(15) NOT NULL,
   `Correo_Electronico` varchar(100) NOT NULL,
   `Distrito` varchar(50) NOT NULL,
+  `Direccion` varchar(255) NOT NULL,
   `Contraseña` varchar(255) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -116,17 +117,17 @@ CREATE TABLE `usuarios` (
 -- Volcado de datos para la tabla `usuarios`
 --
 
-INSERT INTO `usuarios` (`Usuario_ID`, `Nombre`, `Telefono_contacto`, `Correo_Electronico`, `Distrito`, `Contraseña`, `created_at`) VALUES
-('USR-001', 'Carlos Mendoza', '987654321', 'carlos.mendoza@gmail.com', 'Miraflores', 'pass123456', '2026-04-29 00:27:41'),
-('USR-002', 'Ana Lucía Torres', '976543210', 'ana.torres@hotmail.com', 'San Isidro', 'ana2024', '2026-04-29 00:27:41'),
-('USR-003', 'Roberto Sánchez', '965432109', 'roberto.sanchez@yahoo.com', 'Surco', 'rob123', '2026-04-29 00:27:41'),
-('USR-004', 'María Fernández', '954321098', 'maria.fernandez@gmail.com', 'San Borja', 'maria123', '2026-04-29 00:27:41'),
-('USR-005', 'José Luis Ramírez', '943210987', 'jose.ramirez@gmail.com', 'La Molina', 'joseluis', '2026-04-29 00:27:41'),
-('USR-006', 'Patricia Castro', '932109876', 'patricia.castro@hotmail.com', 'San Miguel', 'paty2024', '2026-04-29 00:27:41'),
-('USR-007', 'Fernando Alegría', '921098765', 'fernando.alegria@gmail.com', 'Magdalena', 'fer123', '2026-04-29 00:27:41'),
-('USR-008', 'Isabel Rojas', '910987654', 'isabel.rojas@yahoo.com', 'Lince', 'isabel2024', '2026-04-29 00:27:41'),
-('USR-009', 'Ricardo Paz', '909876543', 'ricardo.paz@gmail.com', 'Jesús María', 'ricardo123', '2026-04-29 00:27:41'),
-('USR-010', 'Ximena Reyes', '998765432', 'ximena.reyes@hotmail.com', 'Pueblo Libre', 'ximena2024', '2026-04-29 00:27:41');
+INSERT INTO `usuarios` (`Usuario_ID`, `Nombre`, `Telefono_contacto`, `Correo_Electronico`, `Distrito`, `Direccion`, `Contraseña`, `created_at`) VALUES
+('USR-001', 'Carlos Mendoza', '987654321', 'carlos.mendoza@gmail.com', 'Miraflores', 'Av. José Larco 400', 'pass123456', '2026-04-29 00:27:41'),
+('USR-002', 'Ana Lucía Torres', '976543210', 'ana.torres@hotmail.com', 'San Isidro', 'Augusto Tamayo 180', 'ana2024', '2026-04-29 00:27:41'),
+('USR-003', 'Roberto Sánchez', '965432109', 'roberto.sanchez@yahoo.com', 'Surco', 'Av. Monte de los Olivos 545', 'rob123', '2026-04-29 00:27:41'),
+('USR-004', 'María Fernández', '954321098', 'maria.fernandez@gmail.com', 'San Borja', 'Av. Joaquín de la Madrid 200', 'maria123', '2026-04-29 00:27:41'),
+('USR-005', 'José Luis Ramírez', '943210987', 'jose.ramirez@gmail.com', 'La Molina', 'Av. Ricardo Elías Aparicio 740', 'joseluis', '2026-04-29 00:27:41'),
+('USR-006', 'Patricia Castro', '932109876', 'patricia.castro@hotmail.com', 'San Miguel', 'Federico Gallese 370', 'paty2024', '2026-04-29 00:27:41'),
+('USR-007', 'Fernando Alegría', '921098765', 'fernando.alegria@gmail.com', 'Magdalena', 'Av. Brasil 3501', 'fer123', '2026-04-29 00:27:41'),
+('USR-008', 'Isabel Rojas', '910987654', 'isabel.rojas@yahoo.com', 'Lince', 'Av. Juan Pardo de Zela 480', 'isabel2024', '2026-04-29 00:27:41'),
+('USR-009', 'Ricardo Paz', '909876543', 'ricardo.paz@gmail.com', 'Jesús María', 'Av. Mariátegui', 'ricardo123', '2026-04-29 00:27:41'),
+('USR-010', 'Ximena Reyes', '998765432', 'ximena.reyes@hotmail.com', 'Pueblo Libre', 'Av. General Vivanco 859' 'ximena2024', '2026-04-29 00:27:41');
 
 --
 -- Disparadores `usuarios`
