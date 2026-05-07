@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificar Antecedentes</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f7fa; color: #333; }
+        .navbar { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); }
+        .navbar h1 { font-size: 24px; }
+        .navbar-links { display: flex; gap: 20px; align-items: center; }
+        .navbar-links a { color: white; text-decoration: none; padding: 8px 16px; border-radius: 5px; transition: background 0.3s; }
+        .navbar-links a:hover { background: rgba(255, 255, 255, 0.2); }
+        .btn-logout { background: #dc3545; padding: 8px 16px; border-radius: 5px; cursor: pointer; text-decoration: none; }
+        .btn-logout:hover { background: #c82333; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 30px 20px; }
+        .section-title { font-size: 20px; font-weight: 600; margin-bottom: 20px; color: #333; }
+        .table-container { background: white; border-radius: 10px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); overflow-x: auto; margin-bottom: 40px; padding: 16px; }
+        table { width: 100%; border-collapse: collapse; }
+        table thead { background: #f5f7fa; border-bottom: 2px solid #ddd; }
+        table th { padding: 15px; text-align: left; font-weight: 600; color: #555; }
+        table td { padding: 15px; border-bottom: 1px solid #eee; }
+        .badge { padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+        .badge-pending { background: #fff3cd; color: #856404; }
+        .badge-verified { background: #d4edda; color: #155724; }
+        .badge-rejected { background: #f8d7da; color: #721c24; }
+        .btn { padding: 6px 10px; border-radius: 6px; border: none; cursor: pointer; }
+        .btn-verify{background:#28a745;color:white}
+        .btn-reject{background:#dc3545;color:white}
+        @media (max-width: 768px) { .navbar { flex-direction: column; gap: 15px; } table th, table td { padding: 10px; } }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h1>Panel Administrativo</h1>
+        <div class="navbar-links">
+            <a th:href="@{/admin/antecedentes}">Verificar Antecedentes</a>
+            <span th:text="'Bienvenido, ' + ${usuarioAdmin.nombre}"></span>
+            <a th:href="@{/admin/logout}" class="btn-logout">Cerrar Sesión</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2 class="section-title">Antecedentes</h2>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Usuario</th>
+                        <th>Estado</th>
+                        <th>Observaciones</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="a : ${antecedentes}">
+                        <td th:text="${a.id}"></td>
+                        <td th:text="${#lists.findFirst(usuarios, u -> u.id == a.usuarioId)?.nombre}">Usuario</td>
+                        <td>
+                            <span class="badge" th:classappend="${a.estado == 'VERIFICADO' ? 'badge-verified' : (a.estado == 'RECHAZADO' ? 'badge-rejected' : 'badge-pending')}" th:text="${a.estado}"></span>
+                        </td>
+                        <td th:text="${a.observaciones}"></td>
+                        <td>
+                            <form th:action="@{/admin/verificar/{id}(id=${a.id})}" method="post" style="display:inline-block;margin-right:6px">
+                                <input type="hidden" name="resultado" value="VERIFICADO" />
+                                <input type="hidden" name="observaciones" value="Verificado por admin" />
+                                <button class="btn btn-verify" type="submit">Verificar</button>
+                            </form>
+                            <form th:action="@{/admin/rechazar/{id}(id=${a.id})}" method="post" style="display:inline-block">
+                                <input type="hidden" name="razon" value="No cumple requisitos" />
+                                <button class="btn btn-reject" type="submit">Rechazar</button>
+                            </form>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>
