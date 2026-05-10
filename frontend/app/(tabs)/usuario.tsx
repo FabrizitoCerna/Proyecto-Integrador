@@ -12,7 +12,7 @@ interface Props {
 }
 
 export default function UsuarioScreen({ onLogout, usuario }: Props) {
-  const [tecnicos, setTecnicos] = useState([]);
+  const [tecnicos, setTecnicos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [filtro, setFiltro] = useState('todos');
   const [menuVisible, setMenuVisible] = useState(false);
@@ -22,7 +22,7 @@ export default function UsuarioScreen({ onLogout, usuario }: Props) {
   async function cargarTecnicos() {
     try {
       const res = await fetch(API);
-      const data = await res.json();
+      const data = await res.json() as any[];
       const verificados = data.filter((t: any) => t.estado === 'verificado');
       setTecnicos(verificados);
     } catch (e) {

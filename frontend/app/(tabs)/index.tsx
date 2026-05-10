@@ -13,7 +13,7 @@ interface Props {
 }
 
 export default function HomeScreen({ onLogout, usuario }: Props) {
-  const [tecnicos, setTecnicos] = useState([]);
+  const [tecnicos, setTecnicos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [nombre, setNombre] = useState('');
   const [especialidad, setEspecialidad] = useState('');
@@ -41,7 +41,7 @@ export default function HomeScreen({ onLogout, usuario }: Props) {
   async function cargarTecnicos() {
     try {
       const res = await fetch(API);
-      const data = await res.json();
+      const data = await res.json() as any[];
       setTecnicos(data);
     } catch (e) {
       mostrarMsg('Error al conectar con el servidor', 'error');
