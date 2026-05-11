@@ -1,30 +1,39 @@
 import { View, Text, TextInput, Button, Alert, StyleSheet } from 'react-native';
-import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { loginUser } from '../service/api';
+import { registerUser } from '../service/api';
+import { useRouter } from 'expo-router';
 
-export default function Index() {
+export default function Register() {
 
   const router = useRouter();
 
+  const [nombre, setNombre] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleLogin = async () => {
-    const res = await loginUser(email, password);
-
-    console.log(res);
+  const handleRegister = async () => {
+    const res = await registerUser(nombre, email, password);
 
     if (res.error) {
       Alert.alert("Error", res.message);
     } else {
-      Alert.alert("Bienvenido", res.data.nombre);
+      Alert.alert("Registro exitoso");
+
+      // 🔁 volver al login
+      router.push('/');
     }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Login</Text>
+      <Text style={styles.title}>Registro</Text>
+
+      <TextInput
+        placeholder="Nombre"
+        value={nombre}
+        onChangeText={setNombre}
+        style={styles.input}
+      />
 
       <TextInput
         placeholder="Email"
@@ -41,13 +50,7 @@ export default function Index() {
         style={styles.input}
       />
 
-      <Button title="Iniciar sesión" onPress={handleLogin} />
-
-      {/* 👇 BOTÓN NUEVO */}
-      <Button 
-        title="Ir a registrarse" 
-        onPress={() => router.push('/register')} 
-      />
+      <Button title="Registrarse" onPress={handleRegister} />
     </View>
   );
 }
@@ -68,4 +71,4 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     padding: 8
   }
-});   
+});
