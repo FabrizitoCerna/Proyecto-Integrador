@@ -3,71 +3,105 @@ const API_URL = "http://192.168.18.10:8080";
 // 🔐 LOGIN
 export const loginUser = async (email: string, password: string) => {
   try {
-    console.log("URL:", `${API_URL}/usuarios/login`);
-
     const response = await fetch(`${API_URL}/usuarios/login`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password })
     });
 
-    console.log("STATUS:", response.status);
-
     const text = await response.text();
-    console.log("RAW RESPONSE:", text);
-
     let data;
-    try {
-      data = JSON.parse(text);
-    } catch {
-      data = text;
-    }
+    try { data = JSON.parse(text); } catch { data = text; }
 
-    if (!response.ok) {
-      return { error: true, message: data };
-    }
-
+    if (!response.ok) return { error: true, message: data };
     return { error: false, data };
 
   } catch (error) {
-    console.log("ERROR COMPLETO:", error);
     return { error: true, message: "Error de conexión" };
   }
 };
 
-
-// 📝 REGISTRO
-export const registerUser = async (
+// 📝 REGISTRO CLIENTE
+export const registerCliente = async (
   nombre: string,
   email: string,
-  password: string
+  password: string,
+  dni: string,
+  telefono: string
 ) => {
   try {
     const response = await fetch(`${API_URL}/usuarios/registro`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        nombre,
-        email,
-        password,
-        tipo: "cliente",
-      }),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ nombre, email, password, dni, telefono, tipo: "cliente" })
     });
 
-    const data = await response.json();
+    const text = await response.text();
+    let data;
+    try { data = JSON.parse(text); } catch { data = text; }
 
-    if (!response.ok) {
-      return { error: true, message: data };
-    }
-
+    if (!response.ok) return { error: true, message: data };
     return { error: false, data };
 
   } catch (error) {
-    console.log("ERROR:", error);
+    return { error: true, message: "Error de conexión" };
+  }
+};
+
+// 📝 REGISTRO ESPECIALISTA
+export const registerEspecialista = async (
+  nombre: string,
+  email: string,
+  password: string,
+  dni: string,
+  telefono: string,
+  descripcion: string,
+  precioReferencial: number,
+  distrito: string,
+  categoriaIds: number[]
+) => {
+  try {
+    // Paso 1: registrar usuario
+    const resUsuario = await fetch(`${API_URL}/usuarios/registro`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ nombre, email, password, dni, telefono, tipo: "especialista" })
+    });
+
+    const textUsuario = await resUsuario.text();
+    let dataUsuario;
+    try { dataUsuario = JSON.parse(textUsuario); } catch { dataUsuario = textUsuario; }
+
+    if (!resUsuario.ok) return { error: true, message: dataUsuario };
+
+    // Paso 2: crear perfil especialista
+    const usuarioId = dataUsuario.id;
+    const resEspecialista = await fetch(`${API_URL}/especialistas/crear/${usuarioId}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ descripcion, precioReferencial, distrito, categoriaIds })
+    });
+
+    const textEsp = await resEspecialista.text();
+    let dataEsp;
+    try { dataEsp = JSON.parse(textEsp); } catch { dataEsp = textEsp; }
+
+    if (!resEspecialista.ok) return { error: true, message: dataEsp };
+    return { error: false, data: dataEsp };
+
+  } catch (error) {
+    return { error: true, message: "Error de conexión" };
+  }
+};
+
+// 📋 OBTENER CATEGORÍAS
+export const getCategorias = async () => {
+  try {
+    const response = await fetch(`${API_URL}/especialistas/categorias`);
+    const data = await response.json();
+    if (!response.ok) return { error: true, message: data };
+    return { error: false, data };
+  } catch (error) {
     return { error: true, message: "Error de conexión" };
   }
 };

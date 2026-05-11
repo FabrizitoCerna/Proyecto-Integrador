@@ -23,7 +23,7 @@ public class UsuarioController {
         return usuarioService.listarUsuarios();
     }
 
-    // POST → guardar (general)
+    // POST → guardar general
     @PostMapping
     public Usuario guardarUsuario(@RequestBody Usuario usuario) {
         return usuarioService.guardarUsuario(usuario);
@@ -33,17 +33,24 @@ public class UsuarioController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Usuario usuario) {
 
-        Usuario usuarioEncontrado = usuarioService.buscarPorEmail(usuario.getEmail());
-
-        if (usuarioEncontrado == null) {
-            return ResponseEntity.status(404).body("Usuario no existe");
+        if (usuario.getEmail() == null || usuario.getPassword() == null) {
+            return ResponseEntity.badRequest().body("Email y contraseña son obligatorios");
         }
 
-        if (!usuarioEncontrado.getPassword().equals(usuario.getPassword())) {
+        Usuario encontrado = usuarioService.buscarPorEmail(usuario.getEmail());
+
+        if (encontrado == null) {
+            return ResponseEntity.status(404).body("Usuario no encontrado");
+        }
+
+        if (!encontrado.getPassword().equals(usuario.getPassword())) {
             return ResponseEntity.status(401).body("Contraseña incorrecta");
         }
 
-        return ResponseEntity.ok(usuarioEncontrado);
+        // No devolver la contraseña
+        encontrado.setPassword(null);
+
+        return ResponseEntity.ok(encontrado);
     }
 
     // REGISTRO
