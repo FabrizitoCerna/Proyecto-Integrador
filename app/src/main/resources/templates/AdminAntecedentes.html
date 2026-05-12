@@ -4,80 +4,196 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Verificar Antecedentes</title>
-    <link rel="stylesheet" th:href="@{/css/styles.css}">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f7fa; color: #333; }
-        .navbar { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); }
-        .navbar h1 { font-size: 24px; }
-        .navbar-links { display: flex; gap: 20px; align-items: center; }
-        .navbar-links a { color: white; text-decoration: none; padding: 8px 16px; border-radius: 5px; transition: background 0.3s; }
-        .navbar-links a:hover { background: rgba(255, 255, 255, 0.2); }
-        .btn-logout { background: #dc3545; padding: 8px 16px; border-radius: 5px; cursor: pointer; text-decoration: none; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #0f1419;
+            color: #e0e0e0;
+        }
+        .navbar {
+            background: #1a1f2e;
+            border-bottom: 1px solid #2a2f3e;
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .navbar-left { display: flex; gap: 24px; align-items: center; }
+        .navbar-title { font-size: 18px; font-weight: 600; }
+        .back-link { color: #667eea; text-decoration: none; font-size: 13px; cursor: pointer; }
+        .navbar-right { display: flex; gap: 16px; align-items: center; font-size: 13px; }
+        .user-info { display: flex; align-items: center; gap: 8px; }
+        .avatar { width: 32px; height: 32px; border-radius: 50%; background: #667eea; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; }
+        .btn-logout { background: #dc3545; color: white; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 12px; cursor: pointer; border: none; transition: all 0.3s; }
         .btn-logout:hover { background: #c82333; }
-        .container { max-width: 1200px; margin: 0 auto; padding: 30px 20px; }
-        .section-title { font-size: 20px; font-weight: 600; margin-bottom: 20px; color: #333; }
-        .table-container { background: white; border-radius: 10px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); overflow-x: auto; margin-bottom: 40px; padding: 16px; }
-        table { width: 100%; border-collapse: collapse; }
-        table thead { background: #f5f7fa; border-bottom: 2px solid #ddd; }
-        table th { padding: 15px; text-align: left; font-weight: 600; color: #555; }
-        table td { padding: 15px; border-bottom: 1px solid #eee; }
-        .badge { padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
-        .badge-pending { background: #fff3cd; color: #856404; }
-        .badge-verified { background: #d4edda; color: #155724; }
-        .badge-rejected { background: #f8d7da; color: #721c24; }
-        .btn { padding: 6px 10px; border-radius: 6px; border: none; cursor: pointer; }
-        .btn-verify{background:#28a745;color:white}
-        .btn-reject{background:#dc3545;color:white}
-        @media (max-width: 768px) { .navbar { flex-direction: column; gap: 15px; } table th, table td { padding: 10px; } }
+        .container { max-width: 1200px; margin: 0 auto; padding: 32px 24px; }
+        .page-header { margin-bottom: 32px; }
+        .page-header h1 { font-size: 28px; margin-bottom: 8px; }
+        .page-header p { color: #808080; font-size: 14px; }
+        .antecedentes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+            gap: 20px;
+        }
+        .antecedente-card {
+            background: #1a1f2e;
+            border: 1px solid #2a2f3e;
+            border-radius: 12px;
+            padding: 24px;
+            transition: all 0.3s;
+        }
+        .antecedente-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.1);
+        }
+        .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+        .card-title { font-size: 16px; font-weight: 600; }
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .badge-PENDIENTE { background: rgba(255, 193, 7, 0.15); color: #ffc107; }
+        .badge-VERIFICADO { background: rgba(40, 167, 69, 0.15); color: #28a745; }
+        .badge-RECHAZADO { background: rgba(220, 53, 69, 0.15); color: #dc3545; }
+        .card-body { margin-bottom: 20px; }
+        .info-row { display: flex; justify-content: space-between; padding: 8px 0; font-size: 13px; color: #a0a0a0; }
+        .info-label { font-weight: 500; }
+        .info-value { color: #e0e0e0; }
+        .form-group { margin-bottom: 14px; }
+        .form-group label { display: block; margin-bottom: 6px; font-weight: 500; font-size: 12px; color: #a0a0a0; }
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #2a2f3e;
+            border-radius: 8px;
+            font-size: 12px;
+            background: #0f1419;
+            color: #e0e0e0;
+            transition: all 0.3s;
+        }
+        .form-group input:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        .form-group textarea { resize: vertical; min-height: 70px; }
+        .card-actions { display: flex; gap: 10px; }
+        .btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            transition: all 0.3s;
+        }
+        .btn-verify { background: #28a745; color: white; }
+        .btn-verify:hover { background: #218838; }
+        .btn-reject { background: #dc3545; color: white; }
+        .btn-reject:hover { background: #c82333; }
+        .empty-message {
+            text-align: center;
+            padding: 60px 20px;
+            color: #808080;
+        }
+        .empty-message p { font-size: 16px; margin-bottom: 8px; }
+        @media (max-width: 768px) {
+            .navbar { flex-direction: column; gap: 16px; }
+            .antecedentes-grid { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
     <div class="navbar">
-        <h1>Panel Administrativo</h1>
-        <div class="navbar-links">
-            <a th:href="@{/admin/antecedentes}">Verificar Antecedentes</a>
-            <span th:text="'Bienvenido, ' + ${usuarioAdmin.nombre}"></span>
-            <a th:href="@{/admin/logout}" class="btn-logout">Cerrar Sesión</a>
+        <div class="navbar-left">
+            <a class="back-link" th:href="@{/admin/dashboard}">← Volver</a>
+            <div class="navbar-title">Verificación de Antecedentes</div>
+        </div>
+        <div class="navbar-right">
+            <div class="user-info">
+                <div class="avatar" th:text="${usuarioAdmin.nombre.charAt(0)}"></div>
+                <span th:text="${usuarioAdmin.nombre}"></span>
+            </div>
+            <a th:href="@{/admin/logout}" class="btn-logout">Salir</a>
         </div>
     </div>
-
+    
     <div class="container">
-        <h2 class="section-title">Antecedentes</h2>
-
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Usuario</th>
-                        <th>Estado</th>
-                        <th>Observaciones</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr th:each="a : ${antecedentes}">
-                        <td th:text="${a.id}"></td>
-                        <td th:text="${#lists.findFirst(usuarios, u -> u.id == a.usuarioId)?.nombre}">Usuario</td>
-                        <td>
-                            <span class="badge" th:classappend="${a.estado == 'VERIFICADO' ? 'badge-verified' : (a.estado == 'RECHAZADO' ? 'badge-rejected' : 'badge-pending')}" th:text="${a.estado}"></span>
-                        </td>
-                        <td th:text="${a.observaciones}"></td>
-                        <td>
-                            <form th:action="@{/admin/verificar/{id}(id=${a.id})}" method="post" style="display:inline-block;margin-right:6px">
-                                <input type="hidden" name="resultado" value="VERIFICADO" />
-                                <input type="hidden" name="observaciones" value="Verificado por admin" />
-                                <button class="btn btn-verify" type="submit">Verificar</button>
-                            </form>
-                            <form th:action="@{/admin/rechazar/{id}(id=${a.id})}" method="post" style="display:inline-block">
-                                <input type="hidden" name="razon" value="No cumple requisitos" />
-                                <button class="btn btn-reject" type="submit">Rechazar</button>
-                            </form>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+        <div class="page-header">
+            <h1>Antecedentes Pendientes</h1>
+            <p>Revisa y verifica los antecedentes de los usuarios</p>
+        </div>
+        
+        <div th:if="${#lists.isEmpty(antecedentes)}" class="empty-message">
+            <p>No hay antecedentes pendientes en este momento.</p>
+            <p style="font-size: 13px; color: #606060;">Vuelve más tarde para verificar nuevas solicitudes</p>
+        </div>
+        
+        <div th:if="${!#lists.isEmpty(antecedentes)}" class="antecedentes-grid">
+            <div th:each="antecedente : ${antecedentes}" class="antecedente-card">
+                <div class="card-header">
+                    <div class="card-title" th:text="'Antecedente #' + ${antecedente.id}"></div>
+                    <span class="badge" th:classappend="${'badge-' + antecedente.estado}" th:text="${antecedente.estado}"></span>
+                </div>
+                
+                <div class="card-body">
+                    <div class="info-row">
+                        <span class="info-label">Usuario ID:</span>
+                        <span class="info-value" th:text="${antecedente.usuarioId}"></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Solicitud:</span>
+                        <span class="info-value" th:text="${#dates.format(antecedente.fechaSolicitud, 'dd/MM/yyyy HH:mm')}"></span>
+                    </div>
+                </div>
+                
+                <div th:if="${antecedente.estado == 'PENDIENTE'}">
+                    <form th:action="@{/admin/verificar/{id}(id=${antecedente.id})}" method="POST" style="margin-bottom: 16px;">
+                        <div class="form-group">
+                            <label>Resultado</label>
+                            <input type="text" name="resultado" placeholder="ej: Aprobado, Pendiente Revisión" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Observaciones</label>
+                            <textarea name="observaciones" placeholder="Detalles de la verificación..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-verify">Verificar Antecedente</button>
+                    </form>
+                    
+                    <form th:action="@{/admin/rechazar/{id}(id=${antecedente.id})}" method="POST">
+                        <div class="form-group">
+                            <label>Razón del Rechazo</label>
+                            <textarea name="razon" placeholder="Motivo por el cual se rechaza..." required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-reject">Rechazar Solicitud</button>
+                    </form>
+                </div>
+                
+                <div th:if="${antecedente.estado != 'PENDIENTE'}" style="background: #0f1419; padding: 16px; border-radius: 8px;">
+                    <div class="info-row">
+                        <span class="info-label">Resultado:</span>
+                        <span class="info-value" th:text="${antecedente.resultado}"></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Verificado:</span>
+                        <span class="info-value" th:text="${#dates.format(antecedente.fechaVerificacion, 'dd/MM/yyyy HH:mm')}"></span>
+                    </div>
+                    <div th:if="${antecedente.observaciones}" style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #2a2f3e;">
+                        <div class="info-label" style="margin-bottom: 8px;">Notas:</div>
+                        <p style="color: #a0a0a0; font-size: 12px; line-height: 1.5;" th:text="${antecedente.observaciones}"></p>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </body>

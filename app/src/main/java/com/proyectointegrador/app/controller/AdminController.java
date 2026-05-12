@@ -29,11 +29,12 @@ public class AdminController {
 
     @GetMapping("/login")
     public String loginPage() {
-        return "login";
+        return "Adminlogin";
     }
 
     @PostMapping("/login")
-    public String procesarLogin(@RequestParam String email, @RequestParam String password, 
+    public String procesarLogin(@RequestParam String email, 
+                                @RequestParam String password, 
                                HttpSession session, Model model) {
         Usuario usuario = usuarioService.login(email, password);
         
@@ -43,7 +44,7 @@ public class AdminController {
         }
         
         model.addAttribute("error", "Email o contraseña inválidos o no tienes permisos de admin");
-        return "login";
+        return "AdminLogin";
     }
 
     @GetMapping("/dashboard")
@@ -70,7 +71,7 @@ public class AdminController {
         model.addAttribute("solicitudes", solicitudes);
         model.addAttribute("usuarioAdmin", admin);
 
-        return "admin-dashboard";
+        return "AdminDashboard";
     }
 
     @GetMapping("/antecedentes")
@@ -87,7 +88,7 @@ public class AdminController {
         model.addAttribute("usuarios", usuarios);
         model.addAttribute("usuarioAdmin", admin);
 
-        return "admin-antecedentes";
+        return "AdminAntecedentes";
     }
 
     @PostMapping("/verificar/{id}")
