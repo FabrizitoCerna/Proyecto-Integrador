@@ -1,6 +1,7 @@
 package com.proyectointegrador.app.model;
 
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "usuarios")
@@ -11,9 +12,36 @@ public class Usuario {
     private int id;
 
     private String nombre;
+
+    @Column(unique = true, nullable = false)
     private String email;
+
     private String password;
-    private String tipo;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private TipoUsuario tipo;
+
+    @Column(unique = true, length = 8)
+    private String dni;
+
+    @Column(length = 9)
+    private String telefono;
+
+    private String fotoUrl;
+
+    @Column(updatable = false)
+    private LocalDateTime fechaRegistro;
+
+    @PrePersist
+    protected void onCreate() {
+        this.fechaRegistro = LocalDateTime.now();
+    }
+
+    // Enum interno
+    public enum TipoUsuario {
+        admin, cliente, especialista
+    }
 
     // Constructor vacío
     public Usuario() {}
@@ -31,6 +59,17 @@ public class Usuario {
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
 
-    public String getTipo() { return tipo; }
-    public void setTipo(String tipo) { this.tipo = tipo; }
+    public TipoUsuario getTipo() { return tipo; }
+    public void setTipo(TipoUsuario tipo) { this.tipo = tipo; }
+
+    public String getDni() { return dni; }
+    public void setDni(String dni) { this.dni = dni; }
+
+    public String getTelefono() { return telefono; }
+    public void setTelefono(String telefono) { this.telefono = telefono; }
+
+    public String getFotoUrl() { return fotoUrl; }
+    public void setFotoUrl(String fotoUrl) { this.fotoUrl = fotoUrl; }
+
+    public LocalDateTime getFechaRegistro() { return fechaRegistro; }
 }
