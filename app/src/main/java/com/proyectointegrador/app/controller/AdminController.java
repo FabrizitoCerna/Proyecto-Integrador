@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpSession;
 import java.util.List;
+import java.util.Optional;
 
 @Controller
 @RequestMapping("/admin")
@@ -29,7 +30,7 @@ public class AdminController {
 
     @GetMapping("/login")
     public String loginPage() {
-        return "Adminlogin";
+        return "AdminLogin";
     }
 
     @PostMapping("/login")
@@ -122,5 +123,67 @@ public class AdminController {
     public String logout(HttpSession session) {
         session.removeAttribute("usuarioAdmin");
         return "redirect:/admin/login";
+    }
+    @GetMapping("/recuperar")
+    public String recuperarPage() {
+        return "AdminLogin";
+    }
+
+    @PostMapping("/recuperar/enviar-codigo")
+    public String enviarCodigo(@RequestParam String email, Model model) {
+        Optional<Usuario> usuario = usuarioService.findByEmail(email);
+        
+        if (usuario.isPresent() && "admin".equals(usuario.get().getTipo())) {
+            String codigo = generarCodigoAleatorio();
+            guardarCodigoRecuperacion(usuario.get().getId(), codigo);
+            
+            // En producción, enviarías por email. Por ahora solo lo guardamos.
+            model.addAttribute("codigoEnviado", true);
+            model.addAttribute("emailRecuperacion", email);
+            model.addAttribute("success", "Código enviado. Usa: " + codigo);
+            return "AdminLogin";
+        }
+        
+        model.addAttribute("error", "Email no encontrado o no es administrador");
+        return "AdminLogin";
+    }
+
+    private String generarCodigoAleatorio() {
+        return String.format("%06d", (int)(Math.random() * 1000000));
+    }
+
+    private void guardarCodigoRecuperacion(int usuarioId, String codigo) {
+        // Aquí guardarías en la tabla rec_contraseña
+        // Por ahora es un placeholder
+    }
+
+    @PostMapping("/recuperar/verificar-codigo")
+    public String verificarCodigo(@RequestParam String email, @RequestParam String codigo, Model model) {
+        model.addAttribute("emailVerificado", email);
+        model.addAttribute("codigoVerificado", codigo);
+        return "AdminLogin";
+    }
+
+    @PostMapping("/recuperar/cambiar-password")
+    public String cambiarPassword(@RequestParam String email, @RequestParam String codigo, 
+                                 @RequestParam String password, @RequestParam String passwordConfirm, 
+                                 Model model) {
+        if (!password.equals(passwordConfirm)) {
+            model.addAttribute("error", "Las contraseñas no coinciden");
+            return "AdminLogin";
+        }
+        
+        Optional<Usuario> usuario = usuarioService.findByEmail(email);
+        if (usuario.isPresent()) {
+            Usuario u = usuario.get();
+            u.setPassword(password);
+            usuarioService.guardarUsuario(u);
+            
+            model.addAttribute("success", "Contraseña actualizada. Inicia sesión con tu nueva contraseña");
+            return "AdminLogin";
+        }
+        
+        model.addAttribute("error", "Error al actualizar la contraseña");
+        return "AdminLogin";
     }
 }

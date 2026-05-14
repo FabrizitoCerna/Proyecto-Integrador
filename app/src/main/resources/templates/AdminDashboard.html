@@ -3,221 +3,393 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Panel Administrativo</title>
+    <title>Login Administrador - Proyecto Integrador</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { 
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: #0f1419;
-            color: #e0e0e0;
-        }
-        .navbar {
-            background: #1a1f2e;
-            border-bottom: 1px solid #2a2f3e;
-            padding: 16px 24px;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 100;
         }
-        .navbar-left { display: flex; gap: 32px; align-items: center; }
-        .navbar-title { font-size: 18px; font-weight: 600; }
-        .navbar-menu { display: flex; gap: 24px; }
-        .navbar-menu a {
-            color: #a0a0a0;
-            text-decoration: none;
-            font-size: 13px;
-            transition: color 0.3s;
-            padding: 8px 0;
-            border-bottom: 2px solid transparent;
+        .login-wrapper {
+            width: 100%;
+            max-width: 420px;
+            padding: 20px;
         }
-        .navbar-menu a:hover { color: #667eea; border-color: #667eea; }
-        .navbar-right { display: flex; gap: 16px; align-items: center; font-size: 13px; }
-        .user-info { display: flex; align-items: center; gap: 8px; }
-        .avatar { width: 32px; height: 32px; border-radius: 50%; background: #667eea; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; }
-        .btn-logout { background: #dc3545; color: white; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 12px; cursor: pointer; border: none; transition: all 0.3s; }
-        .btn-logout:hover { background: #c82333; }
-        .container { max-width: 1400px; margin: 0 auto; padding: 32px 24px; }
-        .page-header { margin-bottom: 32px; }
-        .page-header h1 { font-size: 28px; margin-bottom: 8px; }
-        .page-header p { color: #808080; font-size: 14px; }
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
+        .login-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 50px 40px;
+            backdrop-filter: blur(10px);
+        }
+        .login-header {
+            text-align: center;
             margin-bottom: 40px;
         }
-        .stat-card {
-            background: #1a1f2e;
-            border: 1px solid #2a2f3e;
-            border-radius: 12px;
-            padding: 24px;
-            transition: all 0.3s;
+        .logo {
+            width: 50px;
+            height: 50px;
+            margin: 0 auto 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 24px;
         }
-        .stat-card:hover {
-            border-color: #667eea;
-            box-shadow: 0 0 20px rgba(102, 126, 234, 0.1);
+        .login-header h1 {
+            font-size: 28px;
+            color: #1a1a2e;
+            margin-bottom: 8px;
+            font-weight: 700;
         }
-        .stat-label { color: #808080; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; font-weight: 500; }
-        .stat-value { font-size: 32px; font-weight: 700; color: #667eea; }
-        .stat-change { color: #808080; font-size: 12px; margin-top: 8px; }
-        .section { margin-bottom: 40px; }
-        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .section-title { font-size: 18px; font-weight: 600; }
-        .view-all { color: #667eea; text-decoration: none; font-size: 13px; cursor: pointer; transition: color 0.3s; }
-        .view-all:hover { color: #764ba2; }
-        .table-wrapper {
-            background: #1a1f2e;
-            border: 1px solid #2a2f3e;
-            border-radius: 12px;
-            overflow: hidden;
+        .login-header p {
+            color: #666;
+            font-size: 14px;
         }
-        table {
+        .form-group {
+            margin-bottom: 24px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        .form-group input {
             width: 100%;
-            border-collapse: collapse;
+            padding: 12px 14px;
+            border: 1.5px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+            background: #f8f9fa;
         }
-        table thead {
-            background: #0f1419;
-            border-bottom: 1px solid #2a2f3e;
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
-        table th {
-            padding: 16px 24px;
-            text-align: left;
+        .btn-login {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
             font-weight: 600;
-            color: #a0a0a0;
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 8px;
         }
-        table td {
-            padding: 16px 24px;
-            border-bottom: 1px solid #2a2f3e;
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        .error-message {
+            background: #fee;
+            color: #c33;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #c33;
             font-size: 13px;
         }
-        table tbody tr:last-child td { border-bottom: none; }
-        table tbody tr:hover { background: #242a39; }
-        .badge {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 11px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+        .success-message {
+            background: #efe;
+            color: #3a3;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #3a3;
+            font-size: 13px;
         }
-        .badge-admin { background: rgba(102, 126, 234, 0.15); color: #667eea; }
-        .badge-usuario { background: rgba(160, 160, 160, 0.15); color: #a0a0a0; }
-        .badge-PENDIENTE { background: rgba(255, 193, 7, 0.15); color: #ffc107; }
-        .badge-VERIFICADO { background: rgba(40, 167, 69, 0.15); color: #28a745; }
-        .badge-RECHAZADO { background: rgba(220, 53, 69, 0.15); color: #dc3545; }
-        @media (max-width: 768px) {
-            .navbar { flex-direction: column; gap: 16px; }
-            .navbar-menu { flex-direction: column; gap: 8px; }
-            .stats-grid { grid-template-columns: 1fr; }
-            table { font-size: 12px; }
-            table th, table td { padding: 12px 16px; }
+        .login-footer {
+            text-align: center;
+            margin-top: 24px;
+            color: #999;
+            font-size: 12px;
+        }
+        .forgot-link {
+            text-align: center;
+            margin-top: 16px;
+        }
+        .forgot-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-size: 13px;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        .forgot-link a:hover {
+            color: #764ba2;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal.active {
+            display: flex;
+        }
+        .modal-content {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 50px 40px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        .modal-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .modal-header h2 {
+            font-size: 24px;
+            color: #1a1a2e;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+        .modal-header p {
+            color: #666;
+            font-size: 13px;
+        }
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #999;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        .close-modal:hover {
+            color: #333;
+        }
+        .modal-content {
+            position: relative;
+        }
+        .step {
+            display: none;
+        }
+        .step.active {
+            display: block;
+        }
+        .verification-code-input {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            justify-content: center;
+        }
+        .code-digit {
+            width: 45px;
+            height: 45px;
+            border: 1.5px solid #e0e0e0;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: 600;
+            background: #f8f9fa;
+            transition: all 0.3s;
+        }
+        .code-digit:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        .btn-secondary {
+            width: 100%;
+            padding: 12px;
+            background: #f0f0f0;
+            color: #333;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 8px;
+        }
+        .btn-secondary:hover {
+            background: #e0e0e0;
         }
     </style>
 </head>
 <body>
-    <div class="navbar">
-        <div class="navbar-left">
-            <div class="navbar-title">Dashboard Administrativo</div>
-            <div class="navbar-menu">
-                <a th:href="@{/admin/antecedentes}">Antecedentes</a>
-                <a th:href="@{#}">Configuración</a>
+    <div class="login-wrapper">
+        <div class="login-container">
+            <div class="login-header">
+                <div class="logo">PI</div>
+                <h1>Panel Admin</h1>
+                <p>Acceso restringido a administradores</p>
             </div>
-        </div>
-        <div class="navbar-right">
-            <div class="user-info">
-                <div class="avatar" th:text="${usuarioAdmin.nombre.charAt(0)}"></div>
-                <span th:text="${usuarioAdmin.nombre}"></span>
+            
+            <div th:if="${error}" class="error-message" th:text="${error}"></div>
+            <div th:if="${success}" class="success-message" th:text="${success}"></div>
+            
+            <form method="POST" th:action="@{/admin/login}">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required placeholder="admin@ejemplo.com" autocomplete="email">
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Contraseña</label>
+                    <input type="password" id="password" name="password" required placeholder="••••••••" autocomplete="current-password">
+                </div>
+                
+                <button type="submit" class="btn-login">Iniciar Sesión</button>
+            </form>
+            
+            <div class="forgot-link">
+                <a onclick="abrirModalRecuperacion()">¿Olvidaste tu contraseña?</a>
             </div>
-            <a th:href="@{/admin/logout}" class="btn-logout">Salir</a>
-        </div>
-    </div>
-    
-    <div class="container">
-        <div class="page-header">
-            <h1>Bienvenido al Panel</h1>
-            <p>Gestiona usuarios, solicitudes y verificación de antecedentes</p>
-        </div>
-        
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-label">Total de Usuarios</div>
-                <div class="stat-value" th:text="${totalUsuarios}">0</div>
-                <div class="stat-change">+2 esta semana</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">Solicitudes Pendientes</div>
-                <div class="stat-value" th:text="${solicitudesPendientes}">0</div>
-                <div class="stat-change">Requieren atención</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">Antecedentes Verificados</div>
-                <div class="stat-value" th:text="${antecedentesVerificados}">0</div>
-                <div class="stat-change">Completados</div>
-            </div>
-        </div>
-        
-        <div class="section">
-            <div class="section-header">
-                <div class="section-title">Usuarios Registrados</div>
-                <a class="view-all" th:href="@{#}">Ver todo</a>
-            </div>
-            <div class="table-wrapper">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Nombre</th>
-                            <th>Email</th>
-                            <th>Rol</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr th:each="usuario : ${usuarios}">
-                            <td th:text="${usuario.id}"></td>
-                            <td th:text="${usuario.nombre}"></td>
-                            <td th:text="${usuario.email}"></td>
-                            <td><span class="badge" th:classappend="${usuario.tipo == 'admin' ? 'badge-admin' : 'badge-usuario'}" th:text="${usuario.tipo}"></span></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        
-        <div class="section">
-            <div class="section-header">
-                <div class="section-title">Solicitudes Recientes</div>
-                <a class="view-all" th:href="@{#}">Ver todo</a>
-            </div>
-            <div class="table-wrapper">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Usuario</th>
-                            <th>Tipo</th>
-                            <th>Estado</th>
-                            <th>Fecha</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr th:each="solicitud : ${solicitudes}">
-                            <td th:text="${solicitud.id}"></td>
-                            <td th:text="${solicitud.usuarioId}"></td>
-                            <td th:text="${solicitud.tipo}"></td>
-                            <td><span class="badge" th:classappend="${'badge-' + solicitud.estado}" th:text="${solicitud.estado}"></span></td>
-                            <td th:text="${#dates.format(solicitud.fecha, 'dd/MM/yyyy')}"></td>
-                        </tr>
-                    </tbody>
-                </table>
+            
+            <div class="login-footer">
+                Solo administradores autorizados pueden acceder
             </div>
         </div>
     </div>
+
+    <!-- Modal de Recuperación -->
+    <div id="modalRecuperacion" class="modal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="cerrarModalRecuperacion()">×</button>
+            
+            <!-- Paso 1: Email -->
+            <div id="step1" class="step active">
+                <div class="modal-header">
+                    <h2>Recuperar Contraseña</h2>
+                    <p>Ingresa tu email para recibir un código de verificación</p>
+                </div>
+                
+                <form method="POST" th:action="@{/admin/recuperar/enviar-codigo}">
+                    <div class="form-group">
+                        <label for="emailRecuperacion">Email</label>
+                        <input type="email" id="emailRecuperacion" name="email" required placeholder="admin@ejemplo.com">
+                    </div>
+                    <button type="submit" class="btn-login">Enviar Código</button>
+                </form>
+            </div>
+            
+            <!-- Paso 2: Verificar Código -->
+            <div id="step2" class="step">
+                <div class="modal-header">
+                    <h2>Verificar Código</h2>
+                    <p>Ingresa el código de 6 dígitos que recibiste</p>
+                </div>
+                
+                <form method="POST" th:action="@{/admin/recuperar/verificar-codigo}">
+                    <input type="hidden" id="emailOculto" name="email">
+                    
+                    <div class="verification-code-input" id="codigoInput">
+                        <input type="text" class="code-digit" maxlength="1" inputmode="numeric" required>
+                        <input type="text" class="code-digit" maxlength="1" inputmode="numeric" required>
+                        <input type="text" class="code-digit" maxlength="1" inputmode="numeric" required>
+                        <input type="text" class="code-digit" maxlength="1" inputmode="numeric" required>
+                        <input type="text" class="code-digit" maxlength="1" inputmode="numeric" required>
+                        <input type="text" class="code-digit" maxlength="1" inputmode="numeric" required>
+                    </div>
+                    
+                    <input type="hidden" id="codigoCompleto" name="codigo">
+                    
+                    <button type="submit" class="btn-login">Verificar Código</button>
+                    <button type="button" class="btn-secondary" onclick="volverAlPaso1()">Volver</button>
+                </form>
+            </div>
+            
+            <!-- Paso 3: Nueva Contraseña -->
+            <div id="step3" class="step">
+                <div class="modal-header">
+                    <h2>Nueva Contraseña</h2>
+                    <p>Crea una nueva contraseña para tu cuenta</p>
+                </div>
+                
+                <form method="POST" th:action="@{/admin/recuperar/cambiar-password}">
+                    <input type="hidden" id="emailFinal" name="email">
+                    <input type="hidden" id="codigoFinal" name="codigo">
+                    
+                    <div class="form-group">
+                        <label for="nuevaPassword">Nueva Contraseña</label>
+                        <input type="password" id="nuevaPassword" name="password" required placeholder="••••••••" minlength="3">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="confirmarPassword">Confirmar Contraseña</label>
+                        <input type="password" id="confirmarPassword" name="passwordConfirm" required placeholder="••••••••" minlength="3">
+                    </div>
+                    
+                    <button type="submit" class="btn-login">Cambiar Contraseña</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function abrirModalRecuperacion() {
+            document.getElementById('modalRecuperacion').classList.add('active');
+            mostrarPaso(1);
+        }
+        
+        function cerrarModalRecuperacion() {
+            document.getElementById('modalRecuperacion').classList.remove('active');
+        }
+        
+        function mostrarPaso(numero) {
+            document.querySelectorAll('.step').forEach(step => step.classList.remove('active'));
+            document.getElementById('step' + numero).classList.add('active');
+        }
+        
+        function volverAlPaso1() {
+            mostrarPaso(1);
+        }
+        
+        // Navegar entre campos del código
+        document.querySelectorAll('.code-digit').forEach((input, index) => {
+            input.addEventListener('keyup', function(e) {
+                if (this.value && index < 5) {
+                    document.querySelectorAll('.code-digit')[index + 1].focus();
+                }
+                actualizarCodigoCompleto();
+            });
+            
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Backspace' && !this.value && index > 0) {
+                    document.querySelectorAll('.code-digit')[index - 1].focus();
+                }
+            });
+        });
+        
+        function actualizarCodigoCompleto() {
+            const digitos = Array.from(document.querySelectorAll('.code-digit')).map(input => input.value).join('');
+            document.getElementById('codigoCompleto').value = digitos;
+        }
+        
+        // Cerrar modal al hacer click fuera
+        document.getElementById('modalRecuperacion').addEventListener('click', function(e) {
+            if (e.target === this) {
+                cerrarModalRecuperacion();
+            }
+        });
+    </script>
 </body>
 </html>
