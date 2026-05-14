@@ -29,7 +29,7 @@ public class UsuarioController {
         return usuarioService.guardarUsuario(usuario);
     }
 
-    // LOGIN
+    // LOGIN 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Usuario usuario) {
 

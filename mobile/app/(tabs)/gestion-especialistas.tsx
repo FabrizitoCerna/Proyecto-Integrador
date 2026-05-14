@@ -179,7 +179,7 @@ export default function GestionEspecialistas() {
     <View style={{ flex: 1 }}>
       <ScrollView style={styles.container}>
         <View style={styles.header}>
-            <TouchableOpacity onPress={() => router.replace('/dashboard-admin')} style={styles.backBtn}>
+            <TouchableOpacity onPress={() => router.replace('/home-admin' as any)} style={styles.backBtn}>
                 <Text style={styles.backText}>← Volver</Text>
             </TouchableOpacity>
           <Text style={styles.headerText}>🔧 Gestión de Especialistas</Text>

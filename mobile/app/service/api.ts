@@ -142,3 +142,5 @@ export const eliminarEspecialista = async (id: number) => {
     return { error: true, message: "Error de conexión" };
   }
 };
+
+export default {};

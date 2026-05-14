@@ -1,58 +1,68 @@
-import { View, Text, TextInput, Button, Alert, StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Alert, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { loginUser } from '../service/api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function Index() {
-
   const router = useRouter();
-
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
   const handleLogin = async () => {
+    if (!email || !password) {
+      Alert.alert("Error", "Completa todos los campos");
+      return;
+    }
+
     const res = await loginUser(email, password);
 
-    console.log(res);
-
     if (res.error) {
-      Alert.alert("Error", res.message);
+      Alert.alert("Error", typeof res.message === 'string' ? res.message : "Error al iniciar sesión");
     } else {
-      Alert.alert("Bienvenido", res.data.nombre);
-      if (res.data.tipo == 'admin') {
-        router.replace('/dashboard-admin');
+      // Guardar usuario en sesión
+      await AsyncStorage.setItem('usuario', JSON.stringify(res.data));
+
+      // Redirigir según tipo
+      if (res.data.tipo === 'cliente') {
+        router.replace('../home-cliente');
+      } else if (res.data.tipo === 'especialista') {
+        router.replace('../home-especialista');
       } else {
-        router.replace('/buscar');
+        router.replace('../home-admin');
       }
     }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Login</Text>
+      <Text style={styles.title}>Bienvenido 👋</Text>
+      <Text style={styles.subtitle}>Inicia sesión para continuar</Text>
 
       <TextInput
         placeholder="Email"
         value={email}
         onChangeText={setEmail}
         style={styles.input}
+        keyboardType="email-address"
+        autoCapitalize="none"
       />
 
       <TextInput
-        placeholder="Password"
+        placeholder="Contraseña"
         value={password}
         secureTextEntry
         onChangeText={setPassword}
         style={styles.input}
       />
 
-      <Button title="Iniciar sesión" onPress={handleLogin} />
+      <TouchableOpacity style={styles.btnLogin} onPress={handleLogin}>
+        <Text style={styles.btnTxt}>Iniciar sesión</Text>
+      </TouchableOpacity>
 
-      {/* 👇 BOTÓN NUEVO */}
-      <Button 
-        title="Ir a registrarse" 
-        onPress={() => router.push('/register')} 
-      />
+      <TouchableOpacity onPress={() => router.push('/register')}>
+        <Text style={styles.linkRegistro}>¿No tienes cuenta? Regístrate</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -62,16 +72,46 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    padding: 24,
     backgroundColor: '#fff'
   },
   title: {
-    fontSize: 22,
-    marginBottom: 20
+    fontSize: 28,
+    fontWeight: 'bold',
+    marginBottom: 8,
+    color: '#1a1a1a'
+  },
+  subtitle: {
+    fontSize: 15,
+    color: '#888',
+    marginBottom: 32
   },
   input: {
-    width: 220,
+    width: '100%',
     borderWidth: 1,
-    marginBottom: 10,
-    padding: 8
+    borderColor: '#ddd',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 12,
+    fontSize: 15,
+    backgroundColor: '#fafafa'
+  },
+  btnLogin: {
+    width: '100%',
+    backgroundColor: '#4A90E2',
+    padding: 14,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 8
+  },
+  btnTxt: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold'
+  },
+  linkRegistro: {
+    marginTop: 16,
+    color: '#4A90E2',
+    fontSize: 14
   }
-});   
+});
