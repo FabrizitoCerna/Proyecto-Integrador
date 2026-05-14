@@ -19,6 +19,11 @@ export default function Index() {
       Alert.alert("Error", res.message);
     } else {
       Alert.alert("Bienvenido", res.data.nombre);
+      if (res.data.tipo == 'admin') {
+        router.replace('/dashboard-admin');
+      } else {
+        router.replace('/buscar');
+      }
     }
   };
 
@@ -56,7 +61,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
+    backgroundColor: '#fff'
   },
   title: {
     fontSize: 22,

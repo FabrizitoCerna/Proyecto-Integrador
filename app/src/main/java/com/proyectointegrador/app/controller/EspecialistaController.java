@@ -61,4 +61,12 @@ public class EspecialistaController {
 
         return especialistaService.crearEspecialista(usuarioId, datos, categoriaIds);
     }
+    @PutMapping("/{id}")
+    public ResponseEntity<?> actualizar(@PathVariable int id, @RequestBody Map<String, Object> body) {
+        return especialistaService.actualizarEspecialista(id, body);
+    }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> eliminar(@PathVariable int id) {
+        return especialistaService.eliminarEspecialista(id);
+    }
 }

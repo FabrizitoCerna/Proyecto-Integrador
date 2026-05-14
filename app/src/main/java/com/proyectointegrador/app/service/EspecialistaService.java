@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class EspecialistaService {
@@ -80,5 +81,23 @@ public class EspecialistaService {
             return ResponseEntity.status(404).body("Especialista no encontrado");
         }
         return ResponseEntity.ok(especialista);
+    }
+    // ACTUALIZAR especialista
+    public ResponseEntity<?> actualizarEspecialista(int id, Map<String, Object> body) {
+        Especialista esp = especialistaRepository.findById(id).orElse(null);
+        if (esp == null) return ResponseEntity.status(404).body("Especialista no encontrado");
+        
+        if (body.get("descripcion") != null) esp.setDescripcion(body.get("descripcion").toString());
+        if (body.get("precioReferencial") != null) esp.setPrecioReferencial(Double.parseDouble(body.get("precioReferencial").toString()));
+        if (body.get("distrito") != null) esp.setDistrito(body.get("distrito").toString());
+        if (body.get("disponible") != null) esp.setDisponible((Boolean) body.get("disponible"));
+        
+        return ResponseEntity.ok(especialistaRepository.save(esp));
+    }
+    public ResponseEntity<?> eliminarEspecialista(int id) {
+        Especialista esp = especialistaRepository.findById(id).orElse(null);
+        if (esp == null) return ResponseEntity.status(404).body("Especialista no encontrado");
+        especialistaRepository.deleteById(id);
+        return ResponseEntity.ok("Especialista eliminado");
     }
 }
