@@ -105,3 +105,40 @@ export const getCategorias = async () => {
     return { error: true, message: "Error de conexión" };
   }
 };
+
+// 🔧 ESPECIALISTAS
+export const getEspecialistas = async () => {
+  try {
+    const response = await fetch(`${API_URL}/especialistas`);
+    const data = await response.json();
+    if (!response.ok) return { error: true, message: data };
+    return { error: false, data };
+  } catch (error) {
+    return { error: true, message: "Error de conexión" };
+  }
+};
+
+export const actualizarEspecialista = async (id: number, body: object) => {
+  try {
+    const response = await fetch(`${API_URL}/especialistas/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    const data = await response.json();
+    if (!response.ok) return { error: true, message: data };
+    return { error: false, data };
+  } catch (error) {
+    return { error: true, message: "Error de conexión" };
+  }
+};
+
+export const eliminarEspecialista = async (id: number) => {
+  try {
+    const response = await fetch(`${API_URL}/especialistas/${id}`, { method: 'DELETE' });
+    if (!response.ok) return { error: true, message: "Error al eliminar" };
+    return { error: false };
+  } catch (error) {
+    return { error: true, message: "Error de conexión" };
+  }
+};

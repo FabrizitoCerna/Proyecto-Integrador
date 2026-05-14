@@ -4,11 +4,10 @@ import {
   StyleSheet, ActivityIndicator, ScrollView
 } from 'react-native';
 import { useRouter } from 'expo-router';
-
-const API_URL = 'http://192.168.18.163:8080';
-const router = useRouter();
+import { getCategorias, getEspecialistas } from '../service/api';
 
 export default function BuscarEspecialistas() {
+  const router = useRouter();
   const [especialistas, setEspecialistas] = useState<any[]>([]);
   const [categorias, setCategorias] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -20,26 +19,17 @@ export default function BuscarEspecialistas() {
   }, []);
 
   async function cargarEspecialistas() {
-    try {
-      const res = await fetch(`${API_URL}/especialistas`);
-      const data = await res.json() as any[];
-      const disponibles = data.filter((e: any) => e.disponible === true);
+    const res = await getEspecialistas();
+    if (!res.error) {
+      const disponibles = res.data.filter((e: any) => e.disponible === true);
       setEspecialistas(disponibles);
-    } catch (e) {
-      console.error('Error al cargar especialistas');
-    } finally {
-      setLoading(false);
     }
+    setLoading(false);
   }
 
   async function cargarCategorias() {
-    try {
-      const res = await fetch(`${API_URL}/especialistas/categorias`);
-      const data = await res.json() as any[];
-      setCategorias(data);
-    } catch (e) {
-      console.error('Error al cargar categorías');
-    }
+    const res = await getCategorias();
+    if (!res.error) setCategorias(res.data);
   }
 
   const especialistasFiltrados = filtro === 0
@@ -54,12 +44,11 @@ export default function BuscarEspecialistas() {
         <Text style={styles.headerText}>🔍 Encuentra tu Especialista</Text>
         <Text style={styles.headerSub}>Especialistas disponibles cerca de ti</Text>
         <TouchableOpacity onPress={() => router.replace('/')} style={styles.logoutBtn}>
-            <Text style={styles.logoutText}>Cerrar sesión</Text>
+          <Text style={styles.logoutText}>Cerrar sesión</Text>
         </TouchableOpacity>
       </View>
 
       <View style={styles.inner}>
-        {/* Filtros por categoría */}
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filtrosRow}>
           <TouchableOpacity
             style={[styles.filtroBtn, filtro === 0 && styles.filtroBtnActive]}
@@ -78,7 +67,6 @@ export default function BuscarEspecialistas() {
           ))}
         </ScrollView>
 
-        {/* Lista */}
         {loading ? (
           <ActivityIndicator size="large" color="#4A90E2" style={{ marginTop: 40 }} />
         ) : especialistasFiltrados.length === 0 ? (
@@ -103,8 +91,6 @@ export default function BuscarEspecialistas() {
                   </View>
                 </View>
               </View>
-
-              {/* Categorías */}
               <View style={styles.categoriasRow}>
                 {e.categorias?.map((c: any) => (
                   <View key={c.id} style={styles.categoriaTag}>
@@ -112,7 +98,6 @@ export default function BuscarEspecialistas() {
                   </View>
                 ))}
               </View>
-
               <View style={styles.divider} />
               <View style={styles.cardFooter}>
                 <Text style={styles.precio}>💰 Desde S/ {e.precioReferencial}</Text>
@@ -133,6 +118,8 @@ const styles = StyleSheet.create({
   header: { backgroundColor: '#4A90E2', padding: 20, paddingTop: 50 },
   headerText: { color: 'white', fontSize: 20, fontWeight: 'bold' },
   headerSub: { color: '#d0e8ff', fontSize: 13, marginTop: 4 },
+  logoutBtn: { marginTop: 8, alignSelf: 'flex-end' },
+  logoutText: { color: 'white', fontSize: 13, fontWeight: 'bold' },
   inner: { padding: 16 },
   filtrosRow: { marginBottom: 16 },
   filtroBtn: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20, borderWidth: 1, borderColor: '#4A90E2', marginRight: 8, backgroundColor: 'white' },
@@ -158,6 +145,4 @@ const styles = StyleSheet.create({
   btnContactarText: { color: 'white', fontWeight: 'bold', fontSize: 13 },
   emptyBox: { alignItems: 'center', marginTop: 40 },
   emptyText: { color: '#888', fontSize: 15 },
-  logoutBtn: { marginTop: 8, alignSelf: 'flex-end' },
-  logoutText: { color: 'white', fontSize: 13, fontWeight: 'bold' }
 });
