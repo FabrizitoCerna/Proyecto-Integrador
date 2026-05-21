@@ -20,16 +20,14 @@ export default function Index() {
     if (res.error) {
       Alert.alert("Error", typeof res.message === 'string' ? res.message : "Error al iniciar sesión");
     } else {
-      // Guardar usuario en sesión
       await AsyncStorage.setItem('usuario', JSON.stringify(res.data));
 
-      // Redirigir según tipo
       if (res.data.tipo === 'cliente') {
-        router.replace('../home-cliente');
+        router.replace('/(tabs)/home-cliente' as any);
       } else if (res.data.tipo === 'especialista') {
-        router.replace('../home-especialista');
+        router.replace('/(tabs)/home-especialista' as any);
       } else {
-        router.replace('../home-admin');
+        router.replace('/(tabs)/home-admin' as any);
       }
     }
   };
@@ -60,7 +58,7 @@ export default function Index() {
         <Text style={styles.btnTxt}>Iniciar sesión</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => router.push('/register')}>
+      <TouchableOpacity onPress={() => router.push('/register' as any)}>
         <Text style={styles.linkRegistro}>¿No tienes cuenta? Regístrate</Text>
       </TouchableOpacity>
     </View>

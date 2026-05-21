@@ -106,3 +106,175 @@ export const getCategorias = async () => {
     return { error: true, message: "Error de conexión" };
   }
 };
+
+
+// 📝 CREAR SOLICITUD
+export const crearSolicitud = async (
+  clienteId: number,
+  categoriaId: number,
+  descripcion: string,
+  direccion: string
+) => {
+  try {
+    const response = await fetch(`${API_URL}/solicitudes`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ clienteId, categoriaId, descripcion, direccion })
+    });
+
+    const text = await response.text();
+    let data;
+    try { data = JSON.parse(text); } catch { data = text; }
+
+    if (!response.ok) return { error: true, message: data };
+    return { error: false, data };
+
+  } catch (error) {
+    return { error: true, message: "Error de conexión" };
+  }
+
+  
+};
+
+// 📋 SOLICITUDES PENDIENTES PARA ESPECIALISTA
+export const getSolicitudesEspecialista = async (usuarioId: number) => {
+  try {
+    const response = await fetch(`${API_URL}/solicitudes/especialista/${usuarioId}/pendientes`);
+    const text = await response.text();
+    let data;
+    try { data = JSON.parse(text); } catch { data = text; }
+    if (!response.ok) return { error: true, message: data };
+    return { error: false, data };
+  } catch (error) {
+    return { error: true, message: "Error de conexión" };
+  }
+};
+
+// 💰 CREAR OFERTA
+export const crearOferta = async (
+  solicitudId: number,
+  usuarioId: number,
+  precio: number,
+  mensaje: string
+) => {
+  try {
+    const response = await fetch(`${API_URL}/ofertas`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ solicitudId, usuarioId, precio, mensaje })
+    });
+
+    const text = await response.text();
+    let data;
+    try { data = JSON.parse(text); } catch { data = text; }
+
+    if (!response.ok) return { error: true, message: data };
+    return { error: false, data };
+
+  } catch (error) {
+    return { error: true, message: "Error de conexión" };
+  }
+};
+
+
+// 📋 SOLICITUDES DEL CLIENTE
+export const getSolicitudesCliente = async (clienteId: number) => {
+  try {
+    const response = await fetch(`${API_URL}/solicitudes/cliente/${clienteId}`);
+    const text = await response.text();
+    let data;
+    try { data = JSON.parse(text); } catch { data = text; }
+    if (!response.ok) return { error: true, message: data };
+    return { error: false, data };
+  } catch (error) {
+    return { error: true, message: "Error de conexión" };
+  }
+};
+
+// 📋 OFERTAS DE UNA SOLICITUD
+export const getOfertasSolicitud = async (solicitudId: number) => {
+  try {
+    const response = await fetch(`${API_URL}/ofertas/solicitud/${solicitudId}`);
+    const text = await response.text();
+    let data;
+    try { data = JSON.parse(text); } catch { data = text; }
+    if (!response.ok) return { error: true, message: data };
+    return { error: false, data };
+  } catch (error) {
+    return { error: true, message: "Error de conexión" };
+  }
+};
+
+// ✅ ACEPTAR OFERTA
+export const aceptarOferta = async (ofertaId: number) => {
+  try {
+    const response = await fetch(`${API_URL}/ofertas/${ofertaId}/aceptar`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+    });
+    const text = await response.text();
+    let data;
+    try { data = JSON.parse(text); } catch { data = text; }
+    if (!response.ok) return { error: true, message: data };
+    return { error: false, data };
+  } catch (error) {
+    return { error: true, message: "Error de conexión" };
+  }
+};
+
+// 🚀 INICIAR SERVICIO
+export const iniciarServicio = async (solicitudId: number) => {
+  try {
+    const response = await fetch(`${API_URL}/solicitudes/${solicitudId}/iniciar`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+    });
+    const text = await response.text();
+    let data;
+    try { data = JSON.parse(text); } catch { data = text; }
+    if (!response.ok) return { error: true, message: data };
+    return { error: false, data };
+  } catch (error) {
+    return { error: true, message: "Error de conexión" };
+  }
+};
+
+// ✅ FINALIZAR SERVICIO
+export const finalizarServicio = async (solicitudId: number) => {
+  try {
+    const response = await fetch(`${API_URL}/solicitudes/${solicitudId}/finalizar`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+    });
+    const text = await response.text();
+    let data;
+    try { data = JSON.parse(text); } catch { data = text; }
+    if (!response.ok) return { error: true, message: data };
+    return { error: false, data };
+  } catch (error) {
+    return { error: true, message: "Error de conexión" };
+  }
+};
+
+// ⭐ CALIFICAR SERVICIO
+export const calificarServicio = async (
+  solicitudId: number,
+  clienteId: number,
+  estrellas: number,
+  comentario: string
+) => {
+  try {
+    const response = await fetch(`${API_URL}/calificaciones`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ solicitudId, clienteId, estrellas, comentario })
+    });
+    const text = await response.text();
+    let data;
+    try { data = JSON.parse(text); } catch { data = text; }
+    if (!response.ok) return { error: true, message: data };
+    return { error: false, data };
+  } catch (error) {
+    return { error: true, message: "Error de conexión" };
+  }
+};
