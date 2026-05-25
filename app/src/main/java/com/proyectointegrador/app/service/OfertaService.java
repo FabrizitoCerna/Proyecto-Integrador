@@ -35,8 +35,8 @@ public class OfertaService {
             return ResponseEntity.badRequest().body("Solicitud no encontrada");
         }
 
-        // Verificar que la solicitud esté pendiente
-        if (solicitud.getEstado() != Solicitud.EstadoSolicitud.pendiente) {
+        // Verificar que la solicitud esté en buscando
+        if (solicitud.getEstado() != Solicitud.EstadoSolicitud.buscando) {
             return ResponseEntity.badRequest().body("La solicitud ya no está disponible");
         }
 
@@ -88,9 +88,11 @@ public class OfertaService {
             }
         }
 
-        // Cambiar estado de la solicitud a en_proceso
+        // Cambiar estado de la solicitud a oferta_aceptada
+        // y guardar el especialista ganador
         Solicitud solicitud = oferta.getSolicitud();
-        solicitud.setEstado(Solicitud.EstadoSolicitud.en_proceso);
+        solicitud.setEstado(Solicitud.EstadoSolicitud.oferta_aceptada);
+        solicitud.setEspecialistaGanador(oferta.getEspecialista());
         solicitudRepository.save(solicitud);
 
         return ResponseEntity.ok(oferta);

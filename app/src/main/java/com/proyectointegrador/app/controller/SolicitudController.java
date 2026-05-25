@@ -1,8 +1,6 @@
 package com.proyectointegrador.app.controller;
 
-import com.proyectointegrador.app.model.Especialista;
 import com.proyectointegrador.app.model.Solicitud;
-import com.proyectointegrador.app.repository.EspecialistaRepository;
 import com.proyectointegrador.app.service.SolicitudService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,9 +18,6 @@ public class SolicitudController {
     @Autowired
     private SolicitudService solicitudService;
 
-    @Autowired
-    private EspecialistaRepository especialistaRepository;
-
     // GET → todas las solicitudes
     @GetMapping
     public List<Solicitud> listar() {
@@ -35,10 +30,10 @@ public class SolicitudController {
         return solicitudService.listarPorCliente(clienteId);
     }
 
-    // GET → solicitudes pendientes por categoría
-    @GetMapping("/categoria/{categoriaId}/pendientes")
-    public List<Solicitud> listarPendientes(@PathVariable int categoriaId) {
-        return solicitudService.listarPendientesPorCategoria(categoriaId);
+    // GET → solicitudes para especialista (buscando + propias activas)
+    @GetMapping("/especialista/{usuarioId}")
+    public ResponseEntity<?> listarParaEspecialista(@PathVariable int usuarioId) {
+        return ResponseEntity.ok(solicitudService.listarSolicitudesParaEspecialista(usuarioId));
     }
 
     // POST → crear solicitud
@@ -57,33 +52,17 @@ public class SolicitudController {
         return solicitudService.actualizarEstado(id, estado);
     }
 
-    // GET → solicitudes pendientes para especialista
-    @GetMapping("/especialista/{usuarioId}/pendientes")
-    public ResponseEntity<?> listarPendientesParaEspecialista(@PathVariable int usuarioId) {
-        Especialista especialista = especialistaRepository.findByUsuarioId(usuarioId);
-        if (especialista == null) {
-            return ResponseEntity.status(404).body("Especialista no encontrado");
-        }
-
-        List<Integer> categoriaIds = especialista.getCategorias()
-            .stream()
-            .map(c -> c.getId())
-            .collect(java.util.stream.Collectors.toList());
-
-        return ResponseEntity.ok(solicitudService.listarPendientesPorCategorias(categoriaIds));
+    // PUT → iniciar servicio
+    @PutMapping("/{id}/iniciar")
+    public ResponseEntity<?> iniciar(@PathVariable int id, @RequestBody Map<String, Object> body) {
+        int usuarioId = Integer.parseInt(body.get("usuarioId").toString());
+        return solicitudService.iniciarServicio(id, usuarioId);
     }
 
-
-    // PUT → iniciar servicio
-@PutMapping("/{id}/iniciar")
-public ResponseEntity<?> iniciar(@PathVariable int id) {
-    return solicitudService.iniciarServicio(id);
+    // PUT → finalizar servicio
+    @PutMapping("/{id}/finalizar")
+    public ResponseEntity<?> finalizar(@PathVariable int id, @RequestBody Map<String, Object> body) {
+        int usuarioId = Integer.parseInt(body.get("usuarioId").toString());
+        return solicitudService.finalizarServicio(id, usuarioId);
+    }
 }
-
-// PUT → finalizar servicio
-@PutMapping("/{id}/finalizar")
-public ResponseEntity<?> finalizar(@PathVariable int id) {
-    return solicitudService.finalizarServicio(id);
-}
-}
-

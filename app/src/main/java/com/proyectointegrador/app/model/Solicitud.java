@@ -27,7 +27,11 @@ public class Solicitud {
     private Double longitud;
 
     @Enumerated(EnumType.STRING)
-    private EstadoSolicitud estado = EstadoSolicitud.pendiente;
+    private EstadoSolicitud estado = EstadoSolicitud.buscando;
+
+    @ManyToOne
+    @JoinColumn(name = "especialista_ganador_id")
+    private Especialista especialistaGanador;
 
     @Column(updatable = false)
     private LocalDateTime fechaCreacion;
@@ -41,7 +45,12 @@ public class Solicitud {
     }
 
     public enum EstadoSolicitud {
-        pendiente, en_proceso, iniciado, completada, cancelada
+        buscando,
+        oferta_aceptada,
+        en_progreso,
+        finalizado,
+        completado,
+        cancelado
     }
 
     public Solicitud() {}
@@ -68,6 +77,9 @@ public class Solicitud {
 
     public EstadoSolicitud getEstado() { return estado; }
     public void setEstado(EstadoSolicitud estado) { this.estado = estado; }
+
+    public Especialista getEspecialistaGanador() { return especialistaGanador; }
+    public void setEspecialistaGanador(Especialista especialistaGanador) { this.especialistaGanador = especialistaGanador; }
 
     public LocalDateTime getFechaCreacion() { return fechaCreacion; }
 

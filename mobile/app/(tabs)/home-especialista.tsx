@@ -62,7 +62,7 @@ export default function HomeEspecialista() {
       {
         text: "Sí, iniciar",
         onPress: async () => {
-          const res = await iniciarServicio(solicitudId);
+          const res = await iniciarServicio(solicitudId, usuario.id);
           if (res.error) {
             Alert.alert("Error", typeof res.message === 'string' ? res.message : "Error");
           } else {
@@ -80,7 +80,7 @@ export default function HomeEspecialista() {
       {
         text: "Sí, finalizar",
         onPress: async () => {
-          const res = await finalizarServicio(solicitudId);
+          const res = await finalizarServicio(solicitudId, usuario.id);
           if (res.error) {
             Alert.alert("Error", typeof res.message === 'string' ? res.message : "Error");
           } else {
@@ -94,20 +94,24 @@ export default function HomeEspecialista() {
 
   const getEstadoColor = (estado: string) => {
     switch (estado) {
-      case 'pendiente': return '#F39C12';
-      case 'en_proceso': return '#4A90E2';
-      case 'iniciado': return '#9B59B6';
-      case 'completada': return '#2ECC71';
+      case 'buscando': return '#F39C12';
+      case 'oferta_aceptada': return '#4A90E2';
+      case 'en_progreso': return '#9B59B6';
+      case 'finalizado': return '#2ECC71';
+      case 'completado': return '#27AE60';
+      case 'cancelado': return '#E74C3C';
       default: return '#888';
     }
   };
 
   const getEstadoLabel = (estado: string) => {
     switch (estado) {
-      case 'pendiente': return '⏳ Pendiente';
-      case 'en_proceso': return '🔄 En proceso';
-      case 'iniciado': return '🔧 En curso';
-      case 'completada': return '✅ Completada';
+      case 'buscando': return '⏳ Buscando especialista';
+      case 'oferta_aceptada': return '✅ Oferta aceptada';
+      case 'en_progreso': return '🔧 En progreso';
+      case 'finalizado': return '🏁 Finalizado';
+      case 'completado': return '⭐ Completado';
+      case 'cancelado': return '❌ Cancelado';
       default: return estado;
     }
   };
@@ -133,7 +137,7 @@ export default function HomeEspecialista() {
         {solicitudes.length === 0 ? (
           <View style={styles.vacio}>
             <Text style={styles.vacioIcono}>📭</Text>
-            <Text style={styles.vacioTxt}>No hay solicitudes pendientes</Text>
+            <Text style={styles.vacioTxt}>No hay solicitudes disponibles</Text>
             <Text style={styles.vacioSub}>Desliza hacia abajo para actualizar</Text>
           </View>
         ) : (
@@ -160,27 +164,33 @@ export default function HomeEspecialista() {
               <Text style={styles.cliente}>👤 {sol.cliente?.nombre}</Text>
 
               {/* Botones según estado */}
-              {sol.estado === 'pendiente' && (
+              {sol.estado === 'buscando' && (
                 <TouchableOpacity style={styles.btnOferta} onPress={() => handleOferta(sol)}>
-                  <Text style={styles.btnTxt}>Hacer oferta</Text>
+                  <Text style={styles.btnTxt}>💼 Hacer oferta</Text>
                 </TouchableOpacity>
               )}
 
-              {sol.estado === 'en_proceso' && (
+              {sol.estado === 'oferta_aceptada' && (
                 <TouchableOpacity style={styles.btnIniciar} onPress={() => handleIniciar(sol.id)}>
                   <Text style={styles.btnTxt}>▶ Iniciar servicio</Text>
                 </TouchableOpacity>
               )}
 
-              {sol.estado === 'iniciado' && (
+              {sol.estado === 'en_progreso' && (
                 <TouchableOpacity style={styles.btnFinalizar} onPress={() => handleFinalizar(sol.id)}>
                   <Text style={styles.btnTxt}>✓ Finalizar servicio</Text>
                 </TouchableOpacity>
               )}
 
-              {sol.estado === 'completada' && (
+              {sol.estado === 'finalizado' && (
+                <View style={styles.esperandoBadge}>
+                  <Text style={styles.esperandoTxt}>⏳ Esperando calificación del cliente</Text>
+                </View>
+              )}
+
+              {sol.estado === 'completado' && (
                 <View style={styles.completadaBadge}>
-                  <Text style={styles.completadaTxt}>✅ Servicio completado</Text>
+                  <Text style={styles.completadaTxt}>⭐ Servicio completado y calificado</Text>
                 </View>
               )}
 
@@ -259,6 +269,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   btnTxt: { color: '#fff', fontWeight: 'bold', fontSize: 15 },
-  completadaBadge: { padding: 10, alignItems: 'center' },
+  esperandoBadge: { padding: 10, alignItems: 'center', backgroundColor: '#FFF9E6', borderRadius: 8 },
+  esperandoTxt: { color: '#F39C12', fontWeight: '600', fontSize: 14 },
+  completadaBadge: { padding: 10, alignItems: 'center', backgroundColor: '#F0FFF4', borderRadius: 8 },
   completadaTxt: { color: '#2ECC71', fontWeight: '700', fontSize: 15 },
 });

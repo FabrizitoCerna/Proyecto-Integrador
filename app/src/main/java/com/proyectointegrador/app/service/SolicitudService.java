@@ -21,6 +21,9 @@ public class SolicitudService {
     @Autowired
     private CategoriaRepository categoriaRepository;
 
+    @Autowired
+    private EspecialistaRepository especialistaRepository;
+
     // LISTAR todas
     public List<Solicitud> listarSolicitudes() {
         return solicitudRepository.findAll();
@@ -31,22 +34,50 @@ public class SolicitudService {
         return solicitudRepository.findByClienteId(clienteId);
     }
 
-    // LISTAR pendientes por categoría
+    // LISTAR por categoría
     public List<Solicitud> listarPendientesPorCategoria(int categoriaId) {
         return solicitudRepository.findByCategoriaIdAndEstado(
-            categoriaId, Solicitud.EstadoSolicitud.pendiente
+            categoriaId, Solicitud.EstadoSolicitud.buscando
         );
     }
 
-    // LISTAR pendientes + en_proceso + iniciado por categorías (para especialista)
-    public List<Solicitud> listarPendientesPorCategorias(List<Integer> categoriaIds) {
-    List<Solicitud.EstadoSolicitud> estados = List.of(
-        Solicitud.EstadoSolicitud.pendiente,
-        Solicitud.EstadoSolicitud.en_proceso,
-        Solicitud.EstadoSolicitud.iniciado
-    );
-    return solicitudRepository.findByCategoriaIdsAndEstados(categoriaIds, estados);
-}
+    // LISTAR solicitudes para especialista
+    public List<Solicitud> listarSolicitudesParaEspecialista(int usuarioId) {
+        Especialista especialista = especialistaRepository.findByUsuarioId(usuarioId);
+        if (especialista == null) return List.of();
+
+        // IDs de sus categorías
+        List<Integer> categoriaIds = especialista.getCategorias()
+            .stream()
+            .map(c -> c.getId())
+            .collect(java.util.stream.Collectors.toList());
+
+        // Estados que puede ver en general (solicitudes buscando de su categoría)
+        List<Solicitud.EstadoSolicitud> estadosBuscando = List.of(
+            Solicitud.EstadoSolicitud.buscando
+        );
+
+        // Solicitudes buscando de su categoría
+        List<Solicitud> solicitudesBuscando = solicitudRepository
+            .findByCategoriaIdsAndEstados(categoriaIds, estadosBuscando);
+
+        // Sus propias solicitudes activas (oferta_aceptada, en_progreso, finalizado)
+        List<Solicitud.EstadoSolicitud> estadosPropios = List.of(
+            Solicitud.EstadoSolicitud.oferta_aceptada,
+            Solicitud.EstadoSolicitud.en_progreso,
+            Solicitud.EstadoSolicitud.finalizado
+        );
+
+        List<Solicitud> solicitudesPropias = solicitudRepository
+            .findByEspecialistaGanadorIdAndEstadoIn(especialista.getId(), estadosPropios);
+
+        // Combinar ambas listas
+        List<Solicitud> todas = new java.util.ArrayList<>();
+        todas.addAll(solicitudesBuscando);
+        todas.addAll(solicitudesPropias);
+
+        return todas;
+    }
 
     // CREAR solicitud
     public ResponseEntity<?> crearSolicitud(int clienteId, int categoriaId, String descripcion, String direccion) {
@@ -73,7 +104,7 @@ public class SolicitudService {
         solicitud.setCategoria(categoria);
         solicitud.setDescripcion(descripcion);
         solicitud.setDireccion(direccion);
-        solicitud.setEstado(Solicitud.EstadoSolicitud.pendiente);
+        solicitud.setEstado(Solicitud.EstadoSolicitud.buscando);
 
         return ResponseEntity.ok(solicitudRepository.save(solicitud));
     }
@@ -93,29 +124,47 @@ public class SolicitudService {
     }
 
     // INICIAR servicio
-    public ResponseEntity<?> iniciarServicio(int solicitudId) {
+    public ResponseEntity<?> iniciarServicio(int solicitudId, int usuarioId) {
         Solicitud solicitud = solicitudRepository.findById(solicitudId).orElse(null);
         if (solicitud == null) {
             return ResponseEntity.status(404).body("Solicitud no encontrada");
         }
-        if (solicitud.getEstado() != Solicitud.EstadoSolicitud.en_proceso) {
-            return ResponseEntity.badRequest().body("La solicitud debe estar en proceso para iniciar");
+
+        // Validar estado
+        if (solicitud.getEstado() != Solicitud.EstadoSolicitud.oferta_aceptada) {
+            return ResponseEntity.badRequest().body("La solicitud debe tener oferta aceptada para iniciar");
         }
-        solicitud.setEstado(Solicitud.EstadoSolicitud.iniciado);
+
+        // Validar que sea el especialista ganador
+        Especialista especialista = especialistaRepository.findByUsuarioId(usuarioId);
+        if (especialista == null || solicitud.getEspecialistaGanador().getId() != especialista.getId()) {
+            return ResponseEntity.status(403).body("No tienes permiso para iniciar este servicio");
+        }
+
+        solicitud.setEstado(Solicitud.EstadoSolicitud.en_progreso);
         solicitud.setFechaInicio(LocalDateTime.now());
         return ResponseEntity.ok(solicitudRepository.save(solicitud));
     }
 
     // FINALIZAR servicio
-    public ResponseEntity<?> finalizarServicio(int solicitudId) {
+    public ResponseEntity<?> finalizarServicio(int solicitudId, int usuarioId) {
         Solicitud solicitud = solicitudRepository.findById(solicitudId).orElse(null);
         if (solicitud == null) {
             return ResponseEntity.status(404).body("Solicitud no encontrada");
         }
-        if (solicitud.getEstado() != Solicitud.EstadoSolicitud.iniciado) {
-            return ResponseEntity.badRequest().body("El servicio debe estar iniciado para finalizar");
+
+        // Validar estado
+        if (solicitud.getEstado() != Solicitud.EstadoSolicitud.en_progreso) {
+            return ResponseEntity.badRequest().body("El servicio debe estar en progreso para finalizar");
         }
-        solicitud.setEstado(Solicitud.EstadoSolicitud.completada);
+
+        // Validar que sea el especialista ganador
+        Especialista especialista = especialistaRepository.findByUsuarioId(usuarioId);
+        if (especialista == null || solicitud.getEspecialistaGanador().getId() != especialista.getId()) {
+            return ResponseEntity.status(403).body("No tienes permiso para finalizar este servicio");
+        }
+
+        solicitud.setEstado(Solicitud.EstadoSolicitud.finalizado);
         solicitud.setFechaFin(LocalDateTime.now());
         return ResponseEntity.ok(solicitudRepository.save(solicitud));
     }

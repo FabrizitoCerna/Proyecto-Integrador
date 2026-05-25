@@ -12,21 +12,23 @@ public interface SolicitudRepository extends JpaRepository<Solicitud, Integer> {
     // Solicitudes de un cliente
     List<Solicitud> findByClienteId(int clienteId);
 
-    // Solicitudes por categoría (para que el especialista vea las de su área)
+    // Solicitudes por categoría
     List<Solicitud> findByCategoriaId(int categoriaId);
 
-    // Solicitudes pendientes por categoría
+    // Solicitudes por categoría y estado
     List<Solicitud> findByCategoriaIdAndEstado(int categoriaId, Solicitud.EstadoSolicitud estado);
-    
 
-    // Solicitudes pendientes de una lista de categorías
-@Query("SELECT s FROM Solicitud s WHERE s.categoria.id IN :categoriaIds AND s.estado = 'pendiente'")
-List<Solicitud> findPendientesByCategoriaIds(@Param("categoriaIds") List<Integer> categoriaIds);
+    // Solicitudes de una lista de categorías con estados específicos
+    @Query("SELECT s FROM Solicitud s WHERE s.categoria.id IN :categoriaIds AND s.estado IN :estados")
+    List<Solicitud> findByCategoriaIdsAndEstados(
+        @Param("categoriaIds") List<Integer> categoriaIds,
+        @Param("estados") List<Solicitud.EstadoSolicitud> estados
+    );
 
-@Query("SELECT s FROM Solicitud s WHERE s.categoria.id IN :categoriaIds AND s.estado IN :estados")
-List<Solicitud> findByCategoriaIdsAndEstados(
-    @Param("categoriaIds") List<Integer> categoriaIds,
-    @Param("estados") List<Solicitud.EstadoSolicitud> estados
-);
-
+    // Solicitudes propias del especialista ganador con estados específicos
+    @Query("SELECT s FROM Solicitud s WHERE s.especialistaGanador.id = :especialistaId AND s.estado IN :estados")
+    List<Solicitud> findByEspecialistaGanadorIdAndEstadoIn(
+        @Param("especialistaId") int especialistaId,
+        @Param("estados") List<Solicitud.EstadoSolicitud> estados
+    );
 }

@@ -14,10 +14,21 @@ const ICONOS: { [key: string]: string } = {
 };
 
 const ESTADO_COLORES: { [key: string]: string } = {
-  pendiente: '#F39C12',
-  en_proceso: '#4A90E2',
-  completada: '#2ECC71',
-  cancelada: '#E74C3C',
+  buscando: '#F39C12',
+  oferta_aceptada: '#4A90E2',
+  en_progreso: '#9B59B6',
+  finalizado: '#E67E22',
+  completado: '#2ECC71',
+  cancelado: '#E74C3C',
+};
+
+const ESTADO_LABELS: { [key: string]: string } = {
+  buscando: '⏳ Buscando especialista',
+  oferta_aceptada: '✅ Especialista aceptado',
+  en_progreso: '🔧 Servicio en curso',
+  finalizado: '⭐ Pendiente calificación',
+  completado: '✅ Servicio completado',
+  cancelado: '❌ Cancelado',
 };
 
 export default function HomeCliente() {
@@ -74,9 +85,13 @@ export default function HomeCliente() {
     router.push(`/(tabs)/crear-solicitud?categoriaId=${categoria.id}&categoriaNombre=${encodeURIComponent(categoria.nombre)}` as any);
   };
 
- const handleVerOfertas = (solicitud: any) => {
-  router.push(`/(tabs)/ver-ofertas?solicitudId=${solicitud.id}&descripcion=${encodeURIComponent(solicitud.descripcion)}&estadoSolicitud=${solicitud.estado}` as any);
-};
+  const handleVerOfertas = (solicitud: any) => {
+    router.push(`/(tabs)/ver-ofertas?solicitudId=${solicitud.id}&descripcion=${encodeURIComponent(solicitud.descripcion)}&estadoSolicitud=${solicitud.estado}` as any);
+  };
+
+  const handleCalificar = (solicitud: any) => {
+    router.push(`/(tabs)/calificar?solicitudId=${solicitud.id}&especialistaNombre=${encodeURIComponent(solicitud.especialistaGanador?.usuario?.nombre || '')}` as any);
+  };
 
   return (
     <ScrollView
@@ -145,21 +160,53 @@ export default function HomeCliente() {
           ) : (
             solicitudes.map((sol) => (
               <View key={sol.id} style={styles.solicitudCard}>
+
+                {/* Header */}
                 <View style={styles.solicitudHeader}>
                   <Text style={styles.solicitudCategoria}>{sol.categoria?.nombre}</Text>
                   <Text style={[styles.solicitudEstado, { color: ESTADO_COLORES[sol.estado] || '#888' }]}>
-                    ● {sol.estado}
+                    {ESTADO_LABELS[sol.estado] || sol.estado}
                   </Text>
                 </View>
+
+                {/* Descripción */}
                 <Text style={styles.solicitudDesc}>{sol.descripcion}</Text>
+
+                {/* Dirección */}
                 {sol.direccion ? <Text style={styles.solicitudDir}>📍 {sol.direccion}</Text> : null}
 
-                <TouchableOpacity
-                  style={styles.btnVerOfertas}
-                  onPress={() => handleVerOfertas(sol)}
-                >
-                  <Text style={styles.btnVerOfertasTxt}>Ver ofertas</Text>
-                </TouchableOpacity>
+                {/* Especialista ganador */}
+                {sol.especialistaGanador && (
+                  <Text style={styles.especialista}>
+                    👷 {sol.especialistaGanador?.usuario?.nombre}
+                  </Text>
+                )}
+
+                {/* Botones según estado */}
+                {(sol.estado === 'buscando' || sol.estado === 'oferta_aceptada' || sol.estado === 'en_progreso') && (
+                  <TouchableOpacity
+                    style={styles.btnVerOfertas}
+                    onPress={() => handleVerOfertas(sol)}
+                  >
+                    <Text style={styles.btnVerOfertasTxt}>Ver ofertas</Text>
+                  </TouchableOpacity>
+                )}
+
+                {sol.estado === 'finalizado' && (
+                  <TouchableOpacity
+                    style={styles.btnCalificar}
+                    onPress={() => handleCalificar(sol)}
+                  >
+                    <Text style={styles.btnCalificarTxt}>⭐ Calificar servicio</Text>
+                  </TouchableOpacity>
+                )}
+
+                {sol.estado === 'completado' && (
+                  <View style={styles.completadoBadge}>
+                    <Text style={styles.completadoTxt}>✅ Ya calificaste este servicio</Text>
+                  </View>
+                )}
+
               </View>
             ))
           )}
@@ -189,15 +236,8 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
   },
-  tab: {
-    flex: 1,
-    paddingVertical: 14,
-    alignItems: 'center',
-  },
-  tabActivo: {
-    borderBottomWidth: 2,
-    borderBottomColor: '#4A90E2',
-  },
+  tab: { flex: 1, paddingVertical: 14, alignItems: 'center' },
+  tabActivo: { borderBottomWidth: 2, borderBottomColor: '#4A90E2' },
   tabTxt: { fontSize: 14, color: '#888', fontWeight: '500' },
   tabTxtActivo: { color: '#4A90E2', fontWeight: '700' },
   seccionTitulo: { fontSize: 18, fontWeight: 'bold', margin: 20, color: '#1a1a1a' },
@@ -247,9 +287,10 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: 20,
   },
-  solicitudEstado: { fontSize: 13, fontWeight: '600' },
+  solicitudEstado: { fontSize: 12, fontWeight: '600', flexShrink: 1, textAlign: 'right' },
   solicitudDesc: { fontSize: 15, color: '#333', marginBottom: 6, lineHeight: 22 },
-  solicitudDir: { fontSize: 13, color: '#666', marginBottom: 12 },
+  solicitudDir: { fontSize: 13, color: '#666', marginBottom: 6 },
+  especialista: { fontSize: 13, color: '#555', marginBottom: 12, fontWeight: '500' },
   btnVerOfertas: {
     backgroundColor: '#4A90E2',
     padding: 12,
@@ -257,4 +298,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   btnVerOfertasTxt: { color: '#fff', fontWeight: 'bold', fontSize: 14 },
+  btnCalificar: {
+    backgroundColor: '#F39C12',
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  btnCalificarTxt: { color: '#fff', fontWeight: 'bold', fontSize: 14 },
+  completadoBadge: {
+    padding: 10,
+    alignItems: 'center',
+    backgroundColor: '#F0FFF4',
+    borderRadius: 8,
+  },
+  completadoTxt: { color: '#2ECC71', fontWeight: '600', fontSize: 14 },
 });
