@@ -13,6 +13,9 @@ import java.util.List;
 public class SolicitudService {
 
     @Autowired
+   private NotificacionService notificacionService;
+
+    @Autowired
     private SolicitudRepository solicitudRepository;
 
     @Autowired
@@ -98,6 +101,7 @@ public class SolicitudService {
         if (descripcion == null || descripcion.isBlank()) {
             return ResponseEntity.badRequest().body("La descripción es obligatoria");
         }
+        
 
         Solicitud solicitud = new Solicitud();
         solicitud.setCliente(cliente);
@@ -105,6 +109,12 @@ public class SolicitudService {
         solicitud.setDescripcion(descripcion);
         solicitud.setDireccion(direccion);
         solicitud.setEstado(Solicitud.EstadoSolicitud.buscando);
+        Solicitud solicitudGuardada = solicitudRepository.save(solicitud);
+    notificacionService.notificarNuevaSolicitud(categoriaId, solicitudGuardada);
+
+
+        
+
 
         return ResponseEntity.ok(solicitudRepository.save(solicitud));
     }
@@ -143,6 +153,8 @@ public class SolicitudService {
 
         solicitud.setEstado(Solicitud.EstadoSolicitud.en_progreso);
         solicitud.setFechaInicio(LocalDateTime.now());
+        notificacionService.notificarServicioIniciado(
+    solicitud.getCliente().getId(), solicitud);
         return ResponseEntity.ok(solicitudRepository.save(solicitud));
     }
 
@@ -168,4 +180,6 @@ public class SolicitudService {
         solicitud.setFechaFin(LocalDateTime.now());
         return ResponseEntity.ok(solicitudRepository.save(solicitud));
     }
+
+    
 }

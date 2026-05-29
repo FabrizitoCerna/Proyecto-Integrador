@@ -21,6 +21,9 @@ public class OfertaService {
     @Autowired
     private EspecialistaRepository especialistaRepository;
 
+    @Autowired
+    private NotificacionService notificacionService;
+
     // LISTAR ofertas de una solicitud
     public List<Oferta> listarPorSolicitud(int solicitudId) {
         return ofertaRepository.findBySolicitudId(solicitudId);
@@ -29,34 +32,28 @@ public class OfertaService {
     // CREAR oferta
     public ResponseEntity<?> crearOferta(int solicitudId, int usuarioId, Double precio, String mensaje) {
 
-        // Buscar solicitud
         Solicitud solicitud = solicitudRepository.findById(solicitudId).orElse(null);
         if (solicitud == null) {
             return ResponseEntity.badRequest().body("Solicitud no encontrada");
         }
 
-        // Verificar que la solicitud esté en buscando
         if (solicitud.getEstado() != Solicitud.EstadoSolicitud.buscando) {
             return ResponseEntity.badRequest().body("La solicitud ya no está disponible");
         }
 
-        // Buscar especialista
         Especialista especialista = especialistaRepository.findByUsuarioId(usuarioId);
         if (especialista == null) {
             return ResponseEntity.badRequest().body("Especialista no encontrado");
         }
 
-        // Verificar que no haya hecho ya una oferta
         if (ofertaRepository.existsBySolicitudIdAndEspecialistaId(solicitudId, especialista.getId())) {
             return ResponseEntity.badRequest().body("Ya enviaste una oferta para esta solicitud");
         }
 
-        // Validar precio
         if (precio == null || precio <= 0) {
             return ResponseEntity.badRequest().body("El precio debe ser mayor a 0");
         }
 
-        // Crear oferta
         Oferta oferta = new Oferta();
         oferta.setSolicitud(solicitud);
         oferta.setEspecialista(especialista);
@@ -64,7 +61,10 @@ public class OfertaService {
         oferta.setMensaje(mensaje);
         oferta.setEstado(Oferta.EstadoOferta.pendiente);
 
-        return ResponseEntity.ok(ofertaRepository.save(oferta));
+        Oferta ofertaGuardada = ofertaRepository.save(oferta);
+        notificacionService.notificarNuevaOferta(solicitud.getCliente().getId(), ofertaGuardada);
+
+        return ResponseEntity.ok(ofertaGuardada);
     }
 
     // ACEPTAR oferta
@@ -75,11 +75,9 @@ public class OfertaService {
             return ResponseEntity.status(404).body("Oferta no encontrada");
         }
 
-        // Aceptar esta oferta
         oferta.setEstado(Oferta.EstadoOferta.aceptada);
         ofertaRepository.save(oferta);
 
-        // Rechazar las demás ofertas de esa solicitud
         List<Oferta> otrasOfertas = ofertaRepository.findBySolicitudId(oferta.getSolicitud().getId());
         for (Oferta otra : otrasOfertas) {
             if (otra.getId() != ofertaId) {
@@ -88,12 +86,14 @@ public class OfertaService {
             }
         }
 
-        // Cambiar estado de la solicitud a oferta_aceptada
-        // y guardar el especialista ganador
         Solicitud solicitud = oferta.getSolicitud();
         solicitud.setEstado(Solicitud.EstadoSolicitud.oferta_aceptada);
         solicitud.setEspecialistaGanador(oferta.getEspecialista());
-        solicitudRepository.save(solicitud);
+        Solicitud solicitudGuardada = solicitudRepository.save(solicitud);
+
+        notificacionService.notificarOfertaAceptada(
+            oferta.getEspecialista().getUsuario().getId(), solicitudGuardada
+        );
 
         return ResponseEntity.ok(oferta);
     }

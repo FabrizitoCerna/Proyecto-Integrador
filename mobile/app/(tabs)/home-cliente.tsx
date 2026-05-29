@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getCategorias, getSolicitudesCliente } from '../service/api';
+import { useWebSocket } from '../../hooks/useWebsocket';
 
 const ICONOS: { [key: string]: string } = {
   'Gasfitería': '🔧',
@@ -14,12 +15,12 @@ const ICONOS: { [key: string]: string } = {
 };
 
 const ESTADO_COLORES: { [key: string]: string } = {
-  buscando: '#F39C12',
-  oferta_aceptada: '#4A90E2',
-  en_progreso: '#9B59B6',
-  finalizado: '#E67E22',
-  completado: '#2ECC71',
-  cancelado: '#E74C3C',
+  buscando: '#FFB81C',
+  oferta_aceptada: '#1DB954',
+  en_progreso: '#1ed760',
+  finalizado: '#FFB81C',
+  completado: '#1DB954',
+  cancelado: '#FF4444',
 };
 
 const ESTADO_LABELS: { [key: string]: string } = {
@@ -100,11 +101,11 @@ export default function HomeCliente() {
     >
       {/* Header */}
       <View style={styles.header}>
-        <View>
-          <Text style={styles.saludo}>Hola, {usuario?.nombre} 👋</Text>
-          <Text style={styles.subtitulo}>¿Qué servicio necesitas hoy?</Text>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.saludo}>Hola, {usuario?.nombre?.split(' ')[0]}</Text>
+          <Text style={styles.subtitulo}>Encuentra el servicio que necesitas</Text>
         </View>
-        <TouchableOpacity onPress={handleCerrarSesion}>
+        <TouchableOpacity onPress={handleCerrarSesion} style={{ paddingLeft: 12 }}>
           <Text style={styles.cerrarSesion}>Salir</Text>
         </TouchableOpacity>
       </View>
@@ -130,13 +131,14 @@ export default function HomeCliente() {
       {/* Vista Servicios */}
       {vista === 'servicios' && (
         <>
-          <Text style={styles.seccionTitulo}>Nuestros servicios</Text>
+          <Text style={styles.seccionTitulo}>Categorías disponibles</Text>
           <View style={styles.grid}>
             {categorias.map((cat) => (
               <TouchableOpacity
                 key={cat.id}
                 style={styles.card}
                 onPress={() => handleCategoria(cat)}
+                activeOpacity={0.85}
               >
                 <Text style={styles.cardIcono}>{ICONOS[cat.nombre] || '🔨'}</Text>
                 <Text style={styles.cardNombre}>{cat.nombre}</Text>
@@ -164,13 +166,13 @@ export default function HomeCliente() {
                 {/* Header */}
                 <View style={styles.solicitudHeader}>
                   <Text style={styles.solicitudCategoria}>{sol.categoria?.nombre}</Text>
-                  <Text style={[styles.solicitudEstado, { color: ESTADO_COLORES[sol.estado] || '#888' }]}>
+                  <Text style={[styles.solicitudEstado, { color: ESTADO_COLORES[sol.estado] || '#A0A0A0' }]}>
                     {ESTADO_LABELS[sol.estado] || sol.estado}
                   </Text>
                 </View>
 
                 {/* Descripción */}
-                <Text style={styles.solicitudDesc}>{sol.descripcion}</Text>
+                <Text style={styles.solicitudDesc} numberOfLines={2}>{sol.descripcion}</Text>
 
                 {/* Dirección */}
                 {sol.direccion ? <Text style={styles.solicitudDir}>📍 {sol.direccion}</Text> : null}
@@ -178,7 +180,7 @@ export default function HomeCliente() {
                 {/* Especialista ganador */}
                 {sol.especialistaGanador && (
                   <Text style={styles.especialista}>
-                    👷 {sol.especialistaGanador?.usuario?.nombre}
+                    🔧 {sol.especialistaGanador?.usuario?.nombre}
                   </Text>
                 )}
 
@@ -187,6 +189,7 @@ export default function HomeCliente() {
                   <TouchableOpacity
                     style={styles.btnVerOfertas}
                     onPress={() => handleVerOfertas(sol)}
+                    activeOpacity={0.8}
                   >
                     <Text style={styles.btnVerOfertasTxt}>Ver ofertas</Text>
                   </TouchableOpacity>
@@ -196,6 +199,7 @@ export default function HomeCliente() {
                   <TouchableOpacity
                     style={styles.btnCalificar}
                     onPress={() => handleCalificar(sol)}
+                    activeOpacity={0.8}
                   >
                     <Text style={styles.btnCalificarTxt}>⭐ Calificar servicio</Text>
                   </TouchableOpacity>
@@ -203,7 +207,7 @@ export default function HomeCliente() {
 
                 {sol.estado === 'completado' && (
                   <View style={styles.completadoBadge}>
-                    <Text style={styles.completadoTxt}>✅ Ya calificaste este servicio</Text>
+                    <Text style={styles.completadoTxt}>✅ Servicio calificado</Text>
                   </View>
                 )}
 
@@ -217,58 +221,74 @@ export default function HomeCliente() {
   );
 }
 
+
+
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f5f5f5' },
+  container: { flex: 1, backgroundColor: '#0F0F0F' },
   header: {
-    backgroundColor: '#4A90E2',
+    backgroundColor: '#0F0F0F',
     padding: 24,
     paddingTop: 60,
+    paddingBottom: 32,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
   },
-  saludo: { fontSize: 22, fontWeight: 'bold', color: '#fff' },
-  subtitulo: { fontSize: 14, color: '#d0e8ff', marginTop: 4 },
-  cerrarSesion: { color: '#fff', fontSize: 14, fontWeight: '600' },
+  saludo: { fontSize: 28, fontWeight: '800', color: '#fff', letterSpacing: -0.5 },
+  subtitulo: { fontSize: 15, color: '#A0A0A0', marginTop: 8, fontWeight: '400' },
+  cerrarSesion: {
+    color: '#1DB954',
+    fontSize: 13,
+    fontWeight: '600',
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    backgroundColor: 'rgba(29, 185, 84, 0.12)',
+    borderRadius: 20,
+  },
   tabs: {
     flexDirection: 'row',
-    backgroundColor: '#fff',
+    backgroundColor: '#0F0F0F',
+    paddingHorizontal: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: 'rgba(255, 255, 255, 0.06)',
   },
-  tab: { flex: 1, paddingVertical: 14, alignItems: 'center' },
-  tabActivo: { borderBottomWidth: 2, borderBottomColor: '#4A90E2' },
-  tabTxt: { fontSize: 14, color: '#888', fontWeight: '500' },
-  tabTxtActivo: { color: '#4A90E2', fontWeight: '700' },
-  seccionTitulo: { fontSize: 18, fontWeight: 'bold', margin: 20, color: '#1a1a1a' },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 12, gap: 12 },
+  tab: { flex: 1, paddingVertical: 16, alignItems: 'center' },
+  tabActivo: { borderBottomWidth: 3, borderBottomColor: '#1DB954' },
+  tabTxt: { fontSize: 13, color: '#727272', fontWeight: '600', letterSpacing: 0.3 },
+  tabTxtActivo: { color: '#fff', fontWeight: '700' },
+  seccionTitulo: { fontSize: 22, fontWeight: '800', paddingHorizontal: 20, paddingTop: 28, paddingBottom: 16, color: '#fff', letterSpacing: -0.5 },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 12, gap: 10, marginBottom: 24 },
   card: {
-    width: '45%',
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 20,
+    width: '48%',
+    backgroundColor: '#1DB954',
+    borderRadius: 16,
+    padding: 18,
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    elevation: 3,
+    justifyContent: 'center',
+    minHeight: 160,
+    shadowColor: '#1DB954',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    elevation: 6,
   },
-  cardIcono: { fontSize: 36, marginBottom: 10 },
-  cardNombre: { fontSize: 14, fontWeight: '600', color: '#333', textAlign: 'center' },
+  cardIcono: { fontSize: 44, marginBottom: 12 },
+  cardNombre: { fontSize: 14, fontWeight: '700', color: '#000', textAlign: 'center', letterSpacing: 0.2 },
   lista: { padding: 16 },
-  vacio: { alignItems: 'center', marginTop: 60 },
-  vacioIcono: { fontSize: 48, marginBottom: 16 },
-  vacioTxt: { fontSize: 16, color: '#555', marginBottom: 12 },
-  vacioLink: { color: '#4A90E2', fontWeight: '600', fontSize: 15 },
+  vacio: { alignItems: 'center', marginTop: 80 },
+  vacioIcono: { fontSize: 56, marginBottom: 20 },
+  vacioTxt: { fontSize: 17, color: '#A0A0A0', marginBottom: 20, fontWeight: '500' },
+  vacioLink: { color: '#1DB954', fontWeight: '700', fontSize: 14, paddingHorizontal: 16, paddingVertical: 10, backgroundColor: 'rgba(29, 185, 84, 0.12)', borderRadius: 24 },
   solicitudCard: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
+    backgroundColor: '#181818',
+    borderRadius: 14,
+    padding: 18,
+    marginBottom: 14,
+    borderLeftWidth: 5,
+    borderLeftColor: '#1DB954',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
+    shadowOpacity: 0.4,
     shadowRadius: 4,
     elevation: 3,
   },
@@ -276,40 +296,58 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 12,
   },
   solicitudCategoria: {
-    fontSize: 13,
-    fontWeight: 'bold',
-    color: '#4A90E2',
-    backgroundColor: '#EBF4FF',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 20,
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#1DB954',
+    backgroundColor: 'rgba(29, 185, 84, 0.18)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 18,
+    textTransform: 'uppercase',
+    letterSpacing: 0.4,
   },
-  solicitudEstado: { fontSize: 12, fontWeight: '600', flexShrink: 1, textAlign: 'right' },
-  solicitudDesc: { fontSize: 15, color: '#333', marginBottom: 6, lineHeight: 22 },
-  solicitudDir: { fontSize: 13, color: '#666', marginBottom: 6 },
-  especialista: { fontSize: 13, color: '#555', marginBottom: 12, fontWeight: '500' },
+  solicitudEstado: { fontSize: 12, fontWeight: '700', flexShrink: 1, textAlign: 'right', color: '#fff' },
+  solicitudDesc: { fontSize: 14, color: '#fff', marginBottom: 10, lineHeight: 20, fontWeight: '500' },
+  solicitudDir: { fontSize: 12, color: '#A0A0A0', marginBottom: 10, fontWeight: '400' },
+  especialista: { fontSize: 12, color: '#1DB954', marginBottom: 14, fontWeight: '700' },
   btnVerOfertas: {
-    backgroundColor: '#4A90E2',
-    padding: 12,
-    borderRadius: 8,
+    backgroundColor: '#1DB954',
+    padding: 14,
+    borderRadius: 26,
     alignItems: 'center',
+    marginTop: 10,
+    shadowColor: '#1DB954',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
   },
-  btnVerOfertasTxt: { color: '#fff', fontWeight: 'bold', fontSize: 14 },
+  btnVerOfertasTxt: { color: '#000', fontWeight: '800', fontSize: 13, letterSpacing: 0.3 },
   btnCalificar: {
-    backgroundColor: '#F39C12',
-    padding: 12,
-    borderRadius: 8,
+    backgroundColor: '#1DB954',
+    padding: 14,
+    borderRadius: 26,
     alignItems: 'center',
+    marginTop: 10,
+    shadowColor: '#1DB954',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
   },
-  btnCalificarTxt: { color: '#fff', fontWeight: 'bold', fontSize: 14 },
+  btnCalificarTxt: { color: '#000', fontWeight: '800', fontSize: 13, letterSpacing: 0.3 },
   completadoBadge: {
-    padding: 10,
+    padding: 14,
     alignItems: 'center',
-    backgroundColor: '#F0FFF4',
-    borderRadius: 8,
+    backgroundColor: 'rgba(29, 185, 84, 0.15)',
+    borderRadius: 12,
+    borderLeftWidth: 5,
+    borderLeftColor: '#1DB954',
+    marginTop: 10,
+
   },
-  completadoTxt: { color: '#2ECC71', fontWeight: '600', fontSize: 14 },
+  completadoTxt: { color: '#1DB954', fontWeight: '700', fontSize: 13, letterSpacing: 0.2 },
 });

@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getSolicitudesEspecialista, iniciarServicio, finalizarServicio } from '../service/api';
+import { useWebSocket } from '../../hooks/useWebsocket';
 
 export default function HomeEspecialista() {
   const router = useRouter();
@@ -16,7 +17,7 @@ export default function HomeEspecialista() {
 
   const cargarDatos = async () => {
     const data = await AsyncStorage.getItem('usuario');
-    if (!data) {
+    if (!data) {  
       router.replace('/');
       return;
     }
@@ -29,6 +30,18 @@ export default function HomeEspecialista() {
     const res = await getSolicitudesEspecialista(usuarioId);
     if (!res.error) setSolicitudes(res.data);
   };
+
+  // WebSocket — escuchar notificaciones en tiempo real
+  useWebSocket(usuario?.id, (mensaje) => {
+    if (mensaje.tipo === 'NUEVA_SOLICITUD') {
+      cargarSolicitudes(usuario.id);
+      Alert.alert('🔔 Nueva solicitud', 'Un cliente necesita tu servicio');
+    }
+    if (mensaje.tipo === 'OFERTA_ACEPTADA') {
+      cargarSolicitudes(usuario.id);
+      Alert.alert('🎉 Oferta aceptada', '¡El cliente aceptó tu oferta!');
+    }
+  });
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -121,7 +134,6 @@ export default function HomeEspecialista() {
       style={styles.container}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
-      {/* Header */}
       <View style={styles.header}>
         <View>
           <Text style={styles.saludo}>Hola, {usuario?.nombre} 👷</Text>
@@ -132,7 +144,6 @@ export default function HomeEspecialista() {
         </TouchableOpacity>
       </View>
 
-      {/* Lista de solicitudes */}
       <View style={styles.lista}>
         {solicitudes.length === 0 ? (
           <View style={styles.vacio}>
@@ -143,57 +154,41 @@ export default function HomeEspecialista() {
         ) : (
           solicitudes.map((sol) => (
             <View key={sol.id} style={styles.card}>
-
-              {/* Header */}
               <View style={styles.cardHeader}>
                 <Text style={styles.categoria}>{sol.categoria?.nombre}</Text>
                 <Text style={[styles.estado, { color: getEstadoColor(sol.estado) }]}>
                   {getEstadoLabel(sol.estado)}
                 </Text>
               </View>
-
-              {/* Descripción */}
               <Text style={styles.descripcion}>{sol.descripcion}</Text>
-
-              {/* Dirección */}
-              {sol.direccion ? (
-                <Text style={styles.direccion}>📍 {sol.direccion}</Text>
-              ) : null}
-
-              {/* Cliente */}
+              {sol.direccion ? <Text style={styles.direccion}>📍 {sol.direccion}</Text> : null}
               <Text style={styles.cliente}>👤 {sol.cliente?.nombre}</Text>
 
-              {/* Botones según estado */}
               {sol.estado === 'buscando' && (
                 <TouchableOpacity style={styles.btnOferta} onPress={() => handleOferta(sol)}>
                   <Text style={styles.btnTxt}>💼 Hacer oferta</Text>
                 </TouchableOpacity>
               )}
-
               {sol.estado === 'oferta_aceptada' && (
                 <TouchableOpacity style={styles.btnIniciar} onPress={() => handleIniciar(sol.id)}>
                   <Text style={styles.btnTxt}>▶ Iniciar servicio</Text>
                 </TouchableOpacity>
               )}
-
               {sol.estado === 'en_progreso' && (
                 <TouchableOpacity style={styles.btnFinalizar} onPress={() => handleFinalizar(sol.id)}>
                   <Text style={styles.btnTxt}>✓ Finalizar servicio</Text>
                 </TouchableOpacity>
               )}
-
               {sol.estado === 'finalizado' && (
                 <View style={styles.esperandoBadge}>
                   <Text style={styles.esperandoTxt}>⏳ Esperando calificación del cliente</Text>
                 </View>
               )}
-
               {sol.estado === 'completado' && (
                 <View style={styles.completadaBadge}>
                   <Text style={styles.completadaTxt}>⭐ Servicio completado y calificado</Text>
                 </View>
               )}
-
             </View>
           ))
         )}
@@ -250,24 +245,9 @@ const styles = StyleSheet.create({
   descripcion: { fontSize: 15, color: '#333', marginBottom: 8, lineHeight: 22 },
   direccion: { fontSize: 13, color: '#666', marginBottom: 6 },
   cliente: { fontSize: 13, color: '#888', marginBottom: 12 },
-  btnOferta: {
-    backgroundColor: '#2ECC71',
-    padding: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  btnIniciar: {
-    backgroundColor: '#F39C12',
-    padding: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  btnFinalizar: {
-    backgroundColor: '#E74C3C',
-    padding: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
+  btnOferta: { backgroundColor: '#2ECC71', padding: 12, borderRadius: 8, alignItems: 'center' },
+  btnIniciar: { backgroundColor: '#F39C12', padding: 12, borderRadius: 8, alignItems: 'center' },
+  btnFinalizar: { backgroundColor: '#E74C3C', padding: 12, borderRadius: 8, alignItems: 'center' },
   btnTxt: { color: '#fff', fontWeight: 'bold', fontSize: 15 },
   esperandoBadge: { padding: 10, alignItems: 'center', backgroundColor: '#FFF9E6', borderRadius: 8 },
   esperandoTxt: { color: '#F39C12', fontWeight: '600', fontSize: 14 },
