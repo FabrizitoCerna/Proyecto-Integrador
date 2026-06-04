@@ -1,4 +1,4 @@
-const API_URL = "http://192.168.18.158:8080";
+const API_URL = "http://192.168.18.10:8080";
 
 // 🔐 LOGIN
 export const loginUser = async (email: string, password: string) => {
