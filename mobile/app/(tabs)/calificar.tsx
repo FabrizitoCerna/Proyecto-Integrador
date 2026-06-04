@@ -89,6 +89,7 @@ export default function Calificar() {
         style={[styles.input, styles.inputMultiline]}
         multiline
         numberOfLines={4}
+        placeholderTextColor="#A0A0A0"
       />
 
       {/* Botón */}
@@ -107,7 +108,7 @@ export default function Calificar() {
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#0F0F0F',
     padding: 24,
     paddingTop: 60,
   },
@@ -117,53 +118,54 @@ const styles = StyleSheet.create({
     marginBottom: 32,
     gap: 16,
   },
-  btnVolver: { fontSize: 16, color: '#4A90E2', fontWeight: '600' },
-  titulo: { fontSize: 20, fontWeight: 'bold', color: '#1a1a1a' },
+  btnVolver: { fontSize: 16, color: '#1DB954', fontWeight: '600' },
+  titulo: { fontSize: 20, fontWeight: 'bold', color: '#fff' },
   especialistaCard: {
     alignItems: 'center',
     marginBottom: 32,
     padding: 24,
-    backgroundColor: '#f9f9f9',
+    backgroundColor: '#181818',
     borderRadius: 16,
   },
   especialistaIcono: { fontSize: 48, marginBottom: 12 },
-  especialistaNombre: { fontSize: 20, fontWeight: 'bold', color: '#333', marginBottom: 4 },
-  especialistaSubtitulo: { fontSize: 14, color: '#888' },
-  label: { fontSize: 15, fontWeight: '600', color: '#333', marginBottom: 12 },
+  especialistaNombre: { fontSize: 20, fontWeight: 'bold', color: '#fff', marginBottom: 4 },
+  especialistaSubtitulo: { fontSize: 14, color: '#A0A0A0' },
+  label: { fontSize: 15, fontWeight: '600', color: '#f5f4f4', marginBottom: 12 },
   estrellasContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
     gap: 12,
     marginBottom: 12,
   },
-  estrella: { fontSize: 48, color: '#ddd' },
-  estrellaActiva: { color: '#F39C12' },
+  estrella: { fontSize: 48, color: '#333' },
+  estrellaActiva: { color: '#FFB81C' },
   estrellasLabel: {
     textAlign: 'center',
     fontSize: 16,
-    color: '#555',
+    color: '#A0A0A0',
     marginBottom: 32,
     fontWeight: '500',
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: '#333',
     borderRadius: 8,
     padding: 12,
     fontSize: 15,
-    backgroundColor: '#fafafa',
+    backgroundColor: '#181818',
     marginBottom: 24,
+    color: '#fff',
   },
   inputMultiline: {
     height: 120,
     textAlignVertical: 'top',
   },
   btnEnviar: {
-    backgroundColor: '#4A90E2',
+    backgroundColor: '#1DB954',
     padding: 16,
     borderRadius: 8,
     alignItems: 'center',
   },
-  btnDesactivado: { backgroundColor: '#ccc' },
-  btnTxt: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
+  btnDesactivado: { backgroundColor: '#333' },
+  btnTxt: { color: '#000', fontSize: 16, fontWeight: 'bold' },
 });

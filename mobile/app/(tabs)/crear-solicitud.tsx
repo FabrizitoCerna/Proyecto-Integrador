@@ -71,6 +71,7 @@ export default function CrearSolicitud() {
         style={[styles.input, styles.inputMultiline]}
         multiline
         numberOfLines={4}
+        placeholderTextColor="#A0A0A0"
       />
 
       {/* Dirección */}
@@ -80,6 +81,7 @@ export default function CrearSolicitud() {
         value={direccion}
         onChangeText={setDireccion}
         style={styles.input}
+        placeholderTextColor="#A0A0A0"
       />
 
       {/* Botón */}
@@ -94,7 +96,7 @@ export default function CrearSolicitud() {
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#0F0F0F',
     padding: 24,
     paddingTop: 60,
   },
@@ -106,38 +108,39 @@ const styles = StyleSheet.create({
   },
   btnVolver: {
     fontSize: 16,
-    color: '#4A90E2',
+    color: '#1DB954',
     fontWeight: '600',
   },
   titulo: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#1a1a1a',
+    color: '#fff',
   },
   categoriaTag: {
-    backgroundColor: '#EBF4FF',
+    backgroundColor: '#rgba(29,185,84,0.12)',
     borderRadius: 8,
     padding: 12,
     marginBottom: 24,
   },
   categoriaTxt: {
-    color: '#4A90E2',
+    color: '#1DB954',
     fontWeight: '600',
     fontSize: 15,
   },
   label: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#333',
+    color: '#f5f4f4',
     marginBottom: 8,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: '#333',
     borderRadius: 8,
     padding: 12,
     fontSize: 15,
-    backgroundColor: '#fafafa',
+    backgroundColor: '#181818',
+    color: '#fff',
     marginBottom: 20,
   },
   inputMultiline: {
@@ -145,14 +148,14 @@ const styles = StyleSheet.create({
     textAlignVertical: 'top',
   },
   btnEnviar: {
-    backgroundColor: '#4A90E2',
+    backgroundColor: '#1DB954',
     padding: 16,
     borderRadius: 8,
     alignItems: 'center',
     marginTop: 8,
   },
   btnTxt: {
-    color: '#fff',
+    color: '#000',
     fontSize: 16,
     fontWeight: 'bold',
   },

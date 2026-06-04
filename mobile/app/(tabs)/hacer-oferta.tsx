@@ -72,6 +72,7 @@ export default function HacerOferta() {
         onChangeText={setPrecio}
         style={styles.input}
         keyboardType="numeric"
+        placeholderTextColor="#A0A0A0"
       />
 
       {/* Mensaje */}
@@ -83,6 +84,7 @@ export default function HacerOferta() {
         style={[styles.input, styles.inputMultiline]}
         multiline
         numberOfLines={4}
+        placeholderTextColor="#A0A0A0"
       />
 
       {/* Botón */}
@@ -97,7 +99,7 @@ export default function HacerOferta() {
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#0F0F0F',
     padding: 24,
     paddingTop: 60,
   },
@@ -109,66 +111,67 @@ const styles = StyleSheet.create({
   },
   btnVolver: {
     fontSize: 16,
-    color: '#2ECC71',
+    color: '#1DB954',
     fontWeight: '600',
   },
   titulo: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#1a1a1a',
+    color: '#fff',
   },
   solicitudCard: {
-    backgroundColor: '#f0fff4',
+    backgroundColor: '#181818',
     borderRadius: 12,
     padding: 16,
     marginBottom: 24,
     borderLeftWidth: 4,
-    borderLeftColor: '#2ECC71',
+    borderLeftColor: '#1DB954',
   },
   categoriaTag: {
-    color: '#2ECC71',
+    color: '#1DB954',
     fontWeight: '700',
     fontSize: 14,
     marginBottom: 8,
   },
   solicitudDescripcion: {
     fontSize: 15,
-    color: '#333',
+    color: '#fff',
     marginBottom: 6,
     lineHeight: 22,
   },
   solicitudDireccion: {
     fontSize: 13,
-    color: '#666',
+    color: '#A0A0A0',
   },
   label: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#333',
+    color: '#f5f4f4',
     marginBottom: 8,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: '#333',
     borderRadius: 8,
     padding: 12,
     fontSize: 15,
-    backgroundColor: '#fafafa',
+    backgroundColor: '#141414',
     marginBottom: 20,
+    color: '#fff',
   },
   inputMultiline: {
     height: 120,
     textAlignVertical: 'top',
   },
   btnEnviar: {
-    backgroundColor: '#2ECC71',
+    backgroundColor: '#1DB954',
     padding: 16,
     borderRadius: 8,
     alignItems: 'center',
     marginTop: 8,
   },
   btnTxt: {
-    color: '#fff',
+    color: '#000',
     fontSize: 16,
     fontWeight: 'bold',
   },
