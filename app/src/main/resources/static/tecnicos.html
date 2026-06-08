@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formalización de Técnicos</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔧</text></svg>">
+    <link rel="stylesheet" href="css/styleTecnicos.css">
+</head>
+
+<body>
+    <header>🔧 Formalización y Seguimiento de Técnicos</header>
+
+    <div class="container">
+
+        <!-- FORMULARIO -->
+        <div class="card">
+            <h2>Registrar Técnico</h2>
+            <div id="msg" class="msg"></div>
+            <div class="form-group">
+                <label>Nombre</label>
+                <input type="text" id="nombre" placeholder="Nombre completo">
+            </div>
+            <div class="form-group">
+                <label>Especialidad</label>
+                <input type="text" id="especialidad" placeholder="Ej: Electricista, Gasfitero, Limpieza">
+            </div>
+            <div class="form-group">
+                <label>Teléfono</label>
+                <input type="text" id="telefono" placeholder="Ej: 987654321">
+            </div>
+            <div class="form-group">
+                <label>Estado</label>
+                <select id="estado">
+                    <option value="pendiente">Pendiente</option>
+                    <option value="verificado">Verificado</option>
+                    <option value="suspendido">Suspendido</option>
+                </select>
+            </div>
+            <button class="btn btn-primary" onclick="registrarTecnico()">Registrar Técnico</button>
+        </div>
+
+        <!-- TABLA -->
+        <div class="card">
+            <h2>Lista de Técnicos</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Especialidad</th>
+                        <th>Teléfono</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaTecnicos">
+                    <tr>
+                        <td colspan="6" style="text-align:center;">Cargando...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+    <script src="js/tecnicos.js"></script>
+</body>
+
+</html>

@@ -112,18 +112,18 @@ export default function Register() {
       </View>
 
       {/* Campos comunes */}
-      <TextInput placeholder="Nombre completo" value={nombre} onChangeText={setNombre} style={styles.input} />
-      <TextInput placeholder="Email" value={email} onChangeText={setEmail} style={styles.input} keyboardType="email-address" autoCapitalize="none" />
-      <TextInput placeholder="Contraseña" value={password} onChangeText={setPassword} style={styles.input} secureTextEntry />
-      <TextInput placeholder="DNI (8 dígitos)" value={dni} onChangeText={setDni} style={styles.input} keyboardType="numeric" maxLength={8} />
-      <TextInput placeholder="Teléfono (9 dígitos)" value={telefono} onChangeText={setTelefono} style={styles.input} keyboardType="numeric" maxLength={9} />
+      <TextInput placeholder="Nombre completo" value={nombre} onChangeText={setNombre} style={styles.input} placeholderTextColor="#A0A0A0"/>
+      <TextInput placeholder="Email" value={email} onChangeText={setEmail} style={styles.input} keyboardType="email-address" autoCapitalize="none" placeholderTextColor="#A0A0A0"/>
+      <TextInput placeholder="Contraseña" value={password} onChangeText={setPassword} style={styles.input} secureTextEntry placeholderTextColor="#A0A0A0"/>
+      <TextInput placeholder="DNI (8 dígitos)" value={dni} onChangeText={setDni} style={styles.input} keyboardType="numeric" maxLength={8} placeholderTextColor="#A0A0A0"/>
+      <TextInput placeholder="Teléfono (9 dígitos)" value={telefono} onChangeText={setTelefono} style={styles.input} keyboardType="numeric" maxLength={9} placeholderTextColor="#A0A0A0"/>
 
       {/* Campos solo para especialista */}
       {tipo === 'especialista' && (
         <>
-          <TextInput placeholder="Descripción de tu servicio" value={descripcion} onChangeText={setDescripcion} style={[styles.input, styles.inputMultiline]} multiline numberOfLines={3} />
-          <TextInput placeholder="Precio referencial (S/.)" value={precio} onChangeText={setPrecio} style={styles.input} keyboardType="numeric" />
-          <TextInput placeholder="Distrito donde trabajas" value={distrito} onChangeText={setDistrito} style={styles.input} />
+          <TextInput placeholder="Descripción de tu servicio" value={descripcion} onChangeText={setDescripcion} style={[styles.input, styles.inputMultiline]} multiline numberOfLines={3} placeholderTextColor="#A0A0A0"/>
+          <TextInput placeholder="Precio referencial (S/.)" value={precio} onChangeText={setPrecio} style={styles.input} keyboardType="numeric" placeholderTextColor="#A0A0A0"/>
+          <TextInput placeholder="Distrito donde trabajas" value={distrito} onChangeText={setDistrito} style={styles.input} placeholderTextColor="#A0A0A0"/>
 
           <Text style={styles.label}>Selecciona tus categorías (mín. 1, máx. 2):</Text>
           <View style={styles.categoriasContainer}>
@@ -160,46 +160,47 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 24,
     paddingTop: 60,
-    backgroundColor: '#fff'
+    backgroundColor: '#0f0f0f'
   },
   title: {
     fontSize: 26,
     fontWeight: 'bold',
     marginBottom: 24,
-    color: '#1a1a1a'
+    color: '#fff'
   },
   tipoContainer: {
     flexDirection: 'row',
     marginBottom: 20,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#4A90E2',
+    borderColor: '#1DB954',
     overflow: 'hidden'
   },
   tipoBtn: {
     paddingVertical: 10,
     paddingHorizontal: 30,
-    backgroundColor: '#fff'
+    backgroundColor: '#0f0f0f'
   },
   tipoBtnActivo: {
-    backgroundColor: '#4A90E2'
+    backgroundColor: '#1DB954'
   },
   tipoTxt: {
-    color: '#4A90E2',
+    color: '#1DB954',
     fontWeight: '600'
   },
   tipoTxtActivo: {
-    color: '#fff'
+    color: '#000'
   },
   input: {
     width: '100%',
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: '#333',
     borderRadius: 8,
     padding: 12,
     marginBottom: 12,
     fontSize: 15,
-    backgroundColor: '#fafafa'
+    backgroundColor: '#181818',
+    color: '#fff'
   },
   inputMultiline: {
     height: 80,
@@ -210,7 +211,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     marginBottom: 10,
-    color: '#333'
+    color: '#f5f4f4'
   },
   categoriasContainer: {
     flexDirection: 'row',
@@ -224,35 +225,35 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: '#4A90E2',
-    backgroundColor: '#fff'
+    borderColor: '#1DB954',
+    backgroundColor: '#0F0F0F'
   },
   categoriaBtnActivo: {
-    backgroundColor: '#4A90E2'
+    backgroundColor: '#1DB954'
   },
   categoriaTxt: {
-    color: '#4A90E2',
+    color: '#1DB954',
     fontWeight: '500'
   },
   categoriaTxtActivo: {
-    color: '#fff'
+    color: '#000'
   },
   btnRegistrar: {
     width: '100%',
-    backgroundColor: '#4A90E2',
+    backgroundColor: '#1DB954',
     padding: 14,
     borderRadius: 8,
     alignItems: 'center',
     marginTop: 8
   },
   btnTxt: {
-    color: '#fff',
+    color: '#000',
     fontSize: 16,
     fontWeight: 'bold'
   },
   linkLogin: {
     marginTop: 16,
-    color: '#4A90E2',
+    color: '#1DB954',
     fontSize: 14
   }
 });
