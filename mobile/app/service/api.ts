@@ -221,6 +221,20 @@ export const finalizarServicio = async (solicitudId: number, usuarioId: number) 
   }
 };
 
+// ⭐ RESEÑAS DE UN ESPECIALISTA (id de su usuario)
+export const getResenasEspecialista = async (usuarioId: number) => {
+  try {
+    const response = await fetch(`${API_URL}/calificaciones/especialista/${usuarioId}`);
+    const text = await response.text();
+    let data;
+    try { data = JSON.parse(text); } catch { data = text; }
+    if (!response.ok) return { error: true, message: data };
+    return { error: false, data };
+  } catch {
+    return { error: true, message: "Error de conexión" };
+  }
+};
+
 // ⭐ CALIFICAR SERVICIO
 export const calificarServicio = async (
   solicitudId: number, clienteId: number,

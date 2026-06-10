@@ -1,7 +1,7 @@
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert, RefreshControl } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert, RefreshControl, Modal, Image } from 'react-native';
 import { useEffect, useState } from 'react';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { getOfertasSolicitud, aceptarOferta } from '../service/api';
+import { getOfertasSolicitud, aceptarOferta, getResenasEspecialista } from '../service/api';
 
 export default function VerOfertas() {
   const router = useRouter();
@@ -9,6 +9,11 @@ export default function VerOfertas() {
 
   const [ofertas, setOfertas] = useState<any[]>([]);
   const [refreshing, setRefreshing] = useState(false);
+
+  const [perfilVisible, setPerfilVisible] = useState(false);
+  const [perfilEspecialista, setPerfilEspecialista] = useState<any>(null);
+  const [resenas, setResenas] = useState<any[]>([]);
+  const [cargandoResenas, setCargandoResenas] = useState(false);
 
   useEffect(() => {
     cargarOfertas();
@@ -52,7 +57,22 @@ export default function VerOfertas() {
     router.push(`/(tabs)/calificar?solicitudId=${solicitudId}&especialistaNombre=${encodeURIComponent(oferta.especialista?.usuario?.nombre)}` as any);
   };
 
+  const handleVerPerfil = async (oferta: any) => {
+    setPerfilEspecialista(oferta.especialista);
+    setResenas([]);
+    setPerfilVisible(true);
+
+    const usuarioId = oferta.especialista?.usuario?.id;
+    if (!usuarioId) return;
+
+    setCargandoResenas(true);
+    const res = await getResenasEspecialista(usuarioId);
+    setResenas(res.error ? [] : res.data);
+    setCargandoResenas(false);
+  };
+
   return (
+    <>
     <ScrollView
       style={styles.container}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
@@ -100,6 +120,14 @@ export default function VerOfertas() {
                 <Text style={styles.ofertaMensaje}>"{oferta.mensaje}"</Text>
               ) : null}
 
+              {/* Ver perfil del especialista */}
+              <TouchableOpacity
+                style={styles.btnVerPerfil}
+                onPress={() => handleVerPerfil(oferta)}
+              >
+                <Text style={styles.btnVerPerfilTxt}>👤 Ver perfil</Text>
+              </TouchableOpacity>
+
               {/* Estado pendiente → botón aceptar */}
               {oferta.estado === 'pendiente' && (
                 <TouchableOpacity
@@ -141,6 +169,87 @@ export default function VerOfertas() {
         )}
       </View>
     </ScrollView>
+
+    {/* Modal: Perfil del especialista */}
+    <Modal
+      visible={perfilVisible}
+      animationType="slide"
+      transparent
+      onRequestClose={() => setPerfilVisible(false)}
+    >
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalContent}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitulo}>Perfil del especialista</Text>
+            <TouchableOpacity onPress={() => setPerfilVisible(false)}>
+              <Text style={styles.btnCerrar}>✕</Text>
+            </TouchableOpacity>
+          </View>
+
+          <ScrollView>
+            {/* Foto + nombre + calificación */}
+            <View style={styles.perfilCabecera}>
+              {perfilEspecialista?.usuario?.fotoUrl ? (
+                <Image source={{ uri: perfilEspecialista.usuario.fotoUrl }} style={styles.perfilFoto} />
+              ) : (
+                <View style={styles.perfilFotoPlaceholder}>
+                  <Text style={styles.perfilFotoIcono}>👷</Text>
+                </View>
+              )}
+              <Text style={styles.perfilNombre}>{perfilEspecialista?.usuario?.nombre}</Text>
+              <Text style={styles.perfilCalificacion}>
+                ⭐ {(perfilEspecialista?.calificacionPromedio ?? 0).toFixed(1)} ({resenas.length} {resenas.length === 1 ? 'reseña' : 'reseñas'})
+              </Text>
+            </View>
+
+            {/* Descripción */}
+            {perfilEspecialista?.descripcion ? (
+              <View style={styles.perfilSeccion}>
+                <Text style={styles.perfilSeccionTitulo}>Sobre mí</Text>
+                <Text style={styles.perfilTexto}>{perfilEspecialista.descripcion}</Text>
+              </View>
+            ) : null}
+
+            {/* Detalles */}
+            <View style={styles.perfilSeccion}>
+              <Text style={styles.perfilSeccionTitulo}>Detalles</Text>
+              {perfilEspecialista?.distrito ? (
+                <Text style={styles.perfilDato}>📍 {perfilEspecialista.distrito}</Text>
+              ) : null}
+              {perfilEspecialista?.precioReferencial ? (
+                <Text style={styles.perfilDato}>💰 Precio referencial: S/. {perfilEspecialista.precioReferencial}</Text>
+              ) : null}
+              {perfilEspecialista?.categorias?.length ? (
+                <Text style={styles.perfilDato}>
+                  🏷️ {perfilEspecialista.categorias.map((c: any) => c.nombre).join(', ')}
+                </Text>
+              ) : null}
+            </View>
+
+            {/* Reseñas */}
+            <View style={styles.perfilSeccion}>
+              <Text style={styles.perfilSeccionTitulo}>Reseñas</Text>
+              {cargandoResenas ? (
+                <Text style={styles.perfilTexto}>Cargando reseñas...</Text>
+              ) : resenas.length === 0 ? (
+                <Text style={styles.perfilTexto}>Aún no tiene reseñas</Text>
+              ) : (
+                resenas.map((r: any) => (
+                  <View key={r.id} style={styles.resenaCard}>
+                    <View style={styles.resenaHeader}>
+                      <Text style={styles.resenaCliente}>{r.cliente?.nombre}</Text>
+                      <Text style={styles.resenaEstrellas}>{'⭐'.repeat(r.estrellas)}</Text>
+                    </View>
+                    {r.comentario ? <Text style={styles.resenaComentario}>"{r.comentario}"</Text> : null}
+                  </View>
+                ))
+              )}
+            </View>
+          </ScrollView>
+        </View>
+      </View>
+    </Modal>
+    </>
   );
 }
 
@@ -211,4 +320,72 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   btnCalificarTxt: { color: '#fff', fontWeight: 'bold', fontSize: 15 },
+  btnVerPerfil: {
+    backgroundColor: '#EBF4FF',
+    padding: 10,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  btnVerPerfilTxt: { color: '#4A90E2', fontWeight: '600', fontSize: 14 },
+
+  // Modal perfil
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 20,
+    maxHeight: '85%',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  modalTitulo: { fontSize: 18, fontWeight: 'bold', color: '#333' },
+  btnCerrar: { fontSize: 20, color: '#999', padding: 4 },
+  perfilCabecera: { alignItems: 'center', marginBottom: 20 },
+  perfilFoto: { width: 80, height: 80, borderRadius: 40, marginBottom: 12 },
+  perfilFotoPlaceholder: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: '#EBF4FF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  perfilFotoIcono: { fontSize: 36 },
+  perfilNombre: { fontSize: 18, fontWeight: 'bold', color: '#333', marginBottom: 4 },
+  perfilCalificacion: { fontSize: 15, color: '#F39C12', fontWeight: '600' },
+  perfilSeccion: { marginBottom: 16 },
+  perfilSeccionTitulo: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#4A90E2',
+    marginBottom: 8,
+    textTransform: 'uppercase',
+  },
+  perfilTexto: { fontSize: 14, color: '#555', lineHeight: 20 },
+  perfilDato: { fontSize: 14, color: '#555', marginBottom: 4 },
+  resenaCard: {
+    backgroundColor: '#f9f9f9',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 8,
+  },
+  resenaHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 4,
+  },
+  resenaCliente: { fontSize: 14, fontWeight: '600', color: '#333' },
+  resenaEstrellas: { fontSize: 13 },
+  resenaComentario: { fontSize: 13, color: '#666', fontStyle: 'italic' },
 });
