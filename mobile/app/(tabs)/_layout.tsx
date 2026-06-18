@@ -16,6 +16,7 @@ export default function TabLayout() {
       <Tabs.Screen name="hacer-oferta" options={{ title: 'Hacer Oferta' }} />  {/* ← nuevo */}
       <Tabs.Screen name="ver-ofertas" options={{ title: 'Ver Ofertas' }} />  {/* ← nuevo */}
       <Tabs.Screen name="calificar" options={{ title: 'Calificar' }} />  {/* ← nuevo */}
+      <Tabs.Screen name="historial-especialista" options={{ title: 'Historial' }} />  {/* ← nuevo */}
     </Tabs>
   );
 }

@@ -34,6 +34,12 @@ public class EspecialistaController {
         return especialistaService.obtenerPorUsuario(usuarioId);
     }
 
+    // GET → historial de servicios completados y ganancias totales
+    @GetMapping("/{usuarioId}/historial")
+    public ResponseEntity<?> obtenerHistorial(@PathVariable int usuarioId) {
+        return especialistaService.obtenerHistorial(usuarioId);
+    }
+
     // GET → listar categorías (para el frontend)
     @GetMapping("/categorias")
     public ResponseEntity<?> listarCategorias() {

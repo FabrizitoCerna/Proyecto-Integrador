@@ -235,6 +235,20 @@ export const getResenasEspecialista = async (usuarioId: number) => {
   }
 };
 
+// 📊 HISTORIAL DEL ESPECIALISTA (servicios completados + ganancias)
+export const getHistorialEspecialista = async (usuarioId: number) => {
+  try {
+    const response = await fetch(`${API_URL}/especialistas/${usuarioId}/historial`);
+    const text = await response.text();
+    let data;
+    try { data = JSON.parse(text); } catch { data = text; }
+    if (!response.ok) return { error: true, message: data };
+    return { error: false, data };
+  } catch {
+    return { error: true, message: "Error de conexión" };
+  }
+};
+
 // ⭐ CALIFICAR SERVICIO
 export const calificarServicio = async (
   solicitudId: number, clienteId: number,

@@ -48,7 +48,12 @@ public class UsuarioController {
         }
 
         if (!passwordEncoder.matches(usuario.getPassword(), encontrado.getPassword())) {
-            return ResponseEntity.status(401).body("Contraseña incorrecta");
+            // Migración de cuentas antiguas guardadas con contraseña en texto plano
+            if (!encontrado.getPassword().equals(usuario.getPassword())) {
+                return ResponseEntity.status(401).body("Contraseña incorrecta");
+            }
+            encontrado.setPassword(passwordEncoder.encode(usuario.getPassword()));
+            usuarioService.guardarUsuario(encontrado);
         }
 
         // No devolver la contraseña

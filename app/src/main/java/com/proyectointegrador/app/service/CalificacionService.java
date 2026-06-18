@@ -62,6 +62,10 @@ public class CalificacionService {
 
         actualizarPromedio(especialista);
 
+        // El cliente ya calificó: marcar la solicitud como completada
+        solicitud.setEstado(Solicitud.EstadoSolicitud.completado);
+        solicitudRepository.save(solicitud);
+
         return ResponseEntity.ok(guardada);
     }
 

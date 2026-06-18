@@ -146,7 +146,7 @@ export default function VerOfertas() {
                   </View>
 
                   {/* Botón calificar solo si el servicio está completado */}
-                  {estadoSolicitud === 'completada' && (
+                  {estadoSolicitud === 'finalizado' && (
                     <TouchableOpacity
                       style={styles.btnCalificar}
                       onPress={() => handleCalificar(oferta)}

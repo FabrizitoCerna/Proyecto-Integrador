@@ -9,6 +9,9 @@ public interface CalificacionRepository extends JpaRepository<Calificacion, Inte
 
     boolean existsBySolicitudId(int solicitudId);
 
+    // Calificación de una solicitud (para mostrarla en el historial del especialista)
+    Calificacion findBySolicitudId(int solicitudId);
+
     // Reseñas recibidas por un especialista (id de su Usuario), más recientes primero
     List<Calificacion> findByEspecialistaIdOrderByFechaDesc(int especialistaId);
 }
