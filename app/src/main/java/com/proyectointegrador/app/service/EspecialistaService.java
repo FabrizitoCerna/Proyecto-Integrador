@@ -1,17 +1,25 @@
 package com.proyectointegrador.app.service;
 
+import com.proyectointegrador.app.model.Calificacion;
 import com.proyectointegrador.app.model.Categoria;
 import com.proyectointegrador.app.model.Especialista;
+import com.proyectointegrador.app.model.Oferta;
+import com.proyectointegrador.app.model.Solicitud;
 import com.proyectointegrador.app.model.Usuario;
+import com.proyectointegrador.app.repository.CalificacionRepository;
 import com.proyectointegrador.app.repository.CategoriaRepository;
 import com.proyectointegrador.app.repository.EspecialistaRepository;
+import com.proyectointegrador.app.repository.OfertaRepository;
+import com.proyectointegrador.app.repository.SolicitudRepository;
 import com.proyectointegrador.app.repository.UsuarioRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class EspecialistaService {
@@ -24,6 +32,15 @@ public class EspecialistaService {
 
     @Autowired
     private CategoriaRepository categoriaRepository;
+
+    @Autowired
+    private SolicitudRepository solicitudRepository;
+
+    @Autowired
+    private OfertaRepository ofertaRepository;
+
+    @Autowired
+    private CalificacionRepository calificacionRepository;
 
     // LISTAR todos
     public List<Especialista> listarEspecialistas() {
@@ -80,5 +97,46 @@ public class EspecialistaService {
             return ResponseEntity.status(404).body("Especialista no encontrado");
         }
         return ResponseEntity.ok(especialista);
+    }
+
+    // HISTORIAL: servicios completados y ganancias totales
+    public ResponseEntity<?> obtenerHistorial(int usuarioId) {
+        Especialista especialista = especialistaRepository.findByUsuarioId(usuarioId);
+        if (especialista == null) {
+            return ResponseEntity.status(404).body("Especialista no encontrado");
+        }
+
+        List<Solicitud> completados = solicitudRepository.findByEspecialistaGanadorIdAndEstadoIn(
+            especialista.getId(), List.of(Solicitud.EstadoSolicitud.completado)
+        );
+
+        double totalGanancias = 0;
+        List<Map<String, Object>> servicios = new java.util.ArrayList<>();
+
+        for (Solicitud s : completados) {
+            Oferta oferta = ofertaRepository.findBySolicitudIdAndEstado(s.getId(), Oferta.EstadoOferta.aceptada);
+            double precio = oferta != null ? oferta.getPrecio() : 0;
+            totalGanancias += precio;
+
+            Calificacion calificacion = calificacionRepository.findBySolicitudId(s.getId());
+
+            Map<String, Object> item = new HashMap<>();
+            item.put("solicitudId", s.getId());
+            item.put("categoria", s.getCategoria().getNombre());
+            item.put("cliente", s.getCliente().getNombre());
+            item.put("descripcion", s.getDescripcion());
+            item.put("fechaFin", s.getFechaFin());
+            item.put("precio", precio);
+            item.put("estrellas", calificacion != null ? calificacion.getEstrellas() : null);
+            item.put("comentario", calificacion != null ? calificacion.getComentario() : null);
+            servicios.add(item);
+        }
+
+        Map<String, Object> resultado = new HashMap<>();
+        resultado.put("totalGanancias", totalGanancias);
+        resultado.put("totalServicios", servicios.size());
+        resultado.put("servicios", servicios);
+
+        return ResponseEntity.ok(resultado);
     }
 }
