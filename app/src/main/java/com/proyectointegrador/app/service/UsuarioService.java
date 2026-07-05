@@ -5,6 +5,7 @@ import com.proyectointegrador.app.repository.UsuarioRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,6 +15,9 @@ public class UsuarioService {
 
     @Autowired
     private UsuarioRepository usuarioRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     // LISTAR
     public List<Usuario> listarUsuarios() {
@@ -66,6 +70,9 @@ public class UsuarioService {
         if (usuarioRepository.existsByDni(usuario.getDni())) {
             return ResponseEntity.badRequest().body("El DNI ya está registrado");
         }
+
+        // Hashear contraseña antes de guardar
+        usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
 
         // Guardar
         Usuario nuevo = usuarioRepository.save(usuario);

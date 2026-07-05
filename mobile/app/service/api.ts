@@ -1,4 +1,4 @@
-const API_URL = "http://192.168.18.158:8080";
+const API_URL = "http://192.168.18.161:8080";
 
 // 🔐 LOGIN
 export const loginUser = async (email: string, password: string) => {
@@ -211,6 +211,34 @@ export const finalizarServicio = async (solicitudId: number, usuarioId: number) 
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ usuarioId })
     });
+    const text = await response.text();
+    let data;
+    try { data = JSON.parse(text); } catch { data = text; }
+    if (!response.ok) return { error: true, message: data };
+    return { error: false, data };
+  } catch {
+    return { error: true, message: "Error de conexión" };
+  }
+};
+
+// ⭐ RESEÑAS DE UN ESPECIALISTA (id de su usuario)
+export const getResenasEspecialista = async (usuarioId: number) => {
+  try {
+    const response = await fetch(`${API_URL}/calificaciones/especialista/${usuarioId}`);
+    const text = await response.text();
+    let data;
+    try { data = JSON.parse(text); } catch { data = text; }
+    if (!response.ok) return { error: true, message: data };
+    return { error: false, data };
+  } catch {
+    return { error: true, message: "Error de conexión" };
+  }
+};
+
+// 📊 HISTORIAL DEL ESPECIALISTA (servicios completados + ganancias)
+export const getHistorialEspecialista = async (usuarioId: number) => {
+  try {
+    const response = await fetch(`${API_URL}/especialistas/${usuarioId}/historial`);
     const text = await response.text();
     let data;
     try { data = JSON.parse(text); } catch { data = text; }

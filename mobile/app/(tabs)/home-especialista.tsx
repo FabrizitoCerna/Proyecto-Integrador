@@ -139,9 +139,14 @@ export default function HomeEspecialista() {
           <Text style={styles.saludo}>Hola, {usuario?.nombre} 👷</Text>
           <Text style={styles.subtitulo}>Solicitudes disponibles para ti</Text>
         </View>
-        <TouchableOpacity onPress={handleCerrarSesion}>
-          <Text style={styles.cerrarSesion}>Salir</Text>
-        </TouchableOpacity>
+        <View style={styles.headerAcciones}>
+          <TouchableOpacity onPress={() => router.push('/(tabs)/historial-especialista' as any)}>
+            <Text style={styles.btnHistorial}>📊 Historial</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={handleCerrarSesion}>
+            <Text style={styles.cerrarSesion}>Salir</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       <View style={styles.lista}>
@@ -263,4 +268,19 @@ const styles = StyleSheet.create({
   esperandoTxt: { color: '#FFB81C', fontWeight: '600', fontSize: 14 },
   completadaBadge: { padding: 10, alignItems: 'center', backgroundColor: '#rgba(29,185,84,0.12)', borderRadius: 8 },
   completadaTxt: { color: '#1DB954', fontWeight: '700', fontSize: 15 },
+
+  headerAcciones: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  btnHistorial: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    backgroundColor: '#222',
+    borderRadius: 20,
+  },
 });
