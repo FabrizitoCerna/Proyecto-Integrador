@@ -6,7 +6,6 @@ import { useRouter } from 'expo-router';
 export default function Register() {
   const router = useRouter();
 
-  // Campos comunes
   const [tipo, setTipo] = useState<'cliente' | 'especialista'>('cliente');
   const [nombre, setNombre] = useState('');
   const [email, setEmail] = useState('');
@@ -14,14 +13,12 @@ export default function Register() {
   const [dni, setDni] = useState('');
   const [telefono, setTelefono] = useState('');
 
-  // Campos solo especialista
   const [descripcion, setDescripcion] = useState('');
   const [precio, setPrecio] = useState('');
   const [distrito, setDistrito] = useState('');
   const [categorias, setCategorias] = useState<{ id: number; nombre: string }[]>([]);
   const [categoriasSeleccionadas, setCategoriasSeleccionadas] = useState<number[]>([]);
 
-  // Cargar categorías al montar
   useEffect(() => {
     const cargarCategorias = async () => {
       const res = await getCategorias();
@@ -43,7 +40,6 @@ export default function Register() {
   };
 
   const handleRegister = async () => {
-    // Validaciones básicas
     if (!nombre || !email || !password || !dni || !telefono) {
       Alert.alert("Error", "Todos los campos son obligatorios");
       return;
@@ -65,7 +61,6 @@ export default function Register() {
         Alert.alert("¡Registro exitoso!", "Ya puedes iniciar sesión");
         router.push('/');
       }
-
     } else {
       if (!descripcion || !precio || !distrito) {
         Alert.alert("Error", "Completa todos los campos del especialista");
@@ -95,7 +90,6 @@ export default function Register() {
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Registro</Text>
 
-      {/* Selector de tipo */}
       <View style={styles.tipoContainer}>
         <TouchableOpacity
           style={[styles.tipoBtn, tipo === 'cliente' && styles.tipoBtnActivo]}
@@ -103,6 +97,7 @@ export default function Register() {
         >
           <Text style={[styles.tipoTxt, tipo === 'cliente' && styles.tipoTxtActivo]}>Cliente</Text>
         </TouchableOpacity>
+
         <TouchableOpacity
           style={[styles.tipoBtn, tipo === 'especialista' && styles.tipoBtnActivo]}
           onPress={() => setTipo('especialista')}
@@ -118,22 +113,26 @@ export default function Register() {
       <TextInput placeholder="DNI (8 dígitos)" value={dni} onChangeText={setDni} style={styles.input} keyboardType="numeric" maxLength={8} placeholderTextColor="#A0A0A0"/>
       <TextInput placeholder="Teléfono (9 dígitos)" value={telefono} onChangeText={setTelefono} style={styles.input} keyboardType="numeric" maxLength={9} placeholderTextColor="#A0A0A0"/>
 
-      {/* Campos solo para especialista */}
       {tipo === 'especialista' && (
         <>
           <TextInput placeholder="Descripción de tu servicio" value={descripcion} onChangeText={setDescripcion} style={[styles.input, styles.inputMultiline]} multiline numberOfLines={3} placeholderTextColor="#A0A0A0"/>
           <TextInput placeholder="Precio referencial (S/.)" value={precio} onChangeText={setPrecio} style={styles.input} keyboardType="numeric" placeholderTextColor="#A0A0A0"/>
           <TextInput placeholder="Distrito donde trabajas" value={distrito} onChangeText={setDistrito} style={styles.input} placeholderTextColor="#A0A0A0"/>
 
-          <Text style={styles.label}>Selecciona tus categorías (mín. 1, máx. 2):</Text>
           <View style={styles.categoriasContainer}>
             {categorias.map(cat => (
               <TouchableOpacity
                 key={cat.id}
-                style={[styles.categoriaBtn, categoriasSeleccionadas.includes(cat.id) && styles.categoriaBtnActivo]}
+                style={[
+                  styles.categoriaBtn,
+                  categoriasSeleccionadas.includes(cat.id) && styles.categoriaBtnActivo
+                ]}
                 onPress={() => toggleCategoria(cat.id)}
               >
-                <Text style={[styles.categoriaTxt, categoriasSeleccionadas.includes(cat.id) && styles.categoriaTxtActivo]}>
+                <Text style={[
+                  styles.categoriaTxt,
+                  categoriasSeleccionadas.includes(cat.id) && styles.categoriaTxtActivo
+                ]}>
                   {cat.nombre}
                 </Text>
               </TouchableOpacity>
@@ -149,7 +148,6 @@ export default function Register() {
       <TouchableOpacity onPress={() => router.push('/')}>
         <Text style={styles.linkLogin}>¿Ya tienes cuenta? Inicia sesión</Text>
       </TouchableOpacity>
-
     </ScrollView>
   );
 }
@@ -157,40 +155,48 @@ export default function Register() {
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
+    backgroundColor: '#0F0F0F',
     alignItems: 'center',
     padding: 24,
     paddingTop: 60,
-    backgroundColor: '#0f0f0f'
   },
+
   title: {
     fontSize: 26,
     fontWeight: 'bold',
     marginBottom: 24,
     color: '#fff'
   },
+
   tipoContainer: {
     flexDirection: 'row',
+    backgroundColor: '#181818',
+    borderRadius: 20,
     marginBottom: 20,
-    borderRadius: 8,
     borderWidth: 1,
     borderColor: '#1DB954',
     overflow: 'hidden'
   },
+
   tipoBtn: {
     paddingVertical: 10,
     paddingHorizontal: 30,
     backgroundColor: '#0f0f0f'
   },
+
   tipoBtnActivo: {
     backgroundColor: '#1DB954'
   },
+
   tipoTxt: {
     color: '#1DB954',
     fontWeight: '600'
   },
+
   tipoTxtActivo: {
     color: '#000'
   },
+
   input: {
     width: '100%',
     borderWidth: 1,
@@ -206,13 +212,15 @@ const styles = StyleSheet.create({
     height: 80,
     textAlignVertical: 'top'
   },
+
   label: {
+    color: '#1DB954',
+    fontWeight: '700',
     alignSelf: 'flex-start',
     fontSize: 14,
-    fontWeight: '600',
     marginBottom: 10,
-    color: '#f5f4f4'
   },
+
   categoriasContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -220,37 +228,44 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     width: '100%'
   },
+
   categoriaBtn: {
     paddingVertical: 8,
-    paddingHorizontal: 16,
+    paddingHorizontal: 14,
     borderRadius: 20,
     borderWidth: 1,
     borderColor: '#1DB954',
     backgroundColor: '#0F0F0F'
   },
+
   categoriaBtnActivo: {
     backgroundColor: '#1DB954'
   },
+
   categoriaTxt: {
     color: '#1DB954',
     fontWeight: '500'
   },
+
   categoriaTxtActivo: {
     color: '#000'
   },
+
   btnRegistrar: {
     width: '100%',
     backgroundColor: '#1DB954',
     padding: 14,
     borderRadius: 8,
     alignItems: 'center',
-    marginTop: 8
+    marginTop: 10
   },
+
   btnTxt: {
     color: '#000',
     fontSize: 16,
     fontWeight: 'bold'
   },
+
   linkLogin: {
     marginTop: 16,
     color: '#1DB954',

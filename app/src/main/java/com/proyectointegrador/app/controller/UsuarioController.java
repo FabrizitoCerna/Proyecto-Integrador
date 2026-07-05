@@ -5,6 +5,7 @@ import com.proyectointegrador.app.service.UsuarioService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,6 +17,9 @@ public class UsuarioController {
 
     @Autowired
     private UsuarioService usuarioService;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     // GET → listar usuarios
     @GetMapping
@@ -43,8 +47,13 @@ public class UsuarioController {
             return ResponseEntity.status(404).body("Usuario no encontrado");
         }
 
-        if (!encontrado.getPassword().equals(usuario.getPassword())) {
-            return ResponseEntity.status(401).body("Contraseña incorrecta");
+        if (!passwordEncoder.matches(usuario.getPassword(), encontrado.getPassword())) {
+            // Migración de cuentas antiguas guardadas con contraseña en texto plano
+            if (!encontrado.getPassword().equals(usuario.getPassword())) {
+                return ResponseEntity.status(401).body("Contraseña incorrecta");
+            }
+            encontrado.setPassword(passwordEncoder.encode(usuario.getPassword()));
+            usuarioService.guardarUsuario(encontrado);
         }
 
         // No devolver la contraseña

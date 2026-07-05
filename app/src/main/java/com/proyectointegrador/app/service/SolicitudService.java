@@ -64,11 +64,12 @@ public class SolicitudService {
         List<Solicitud> solicitudesBuscando = solicitudRepository
             .findByCategoriaIdsAndEstados(categoriaIds, estadosBuscando);
 
-        // Sus propias solicitudes activas (oferta_aceptada, en_progreso, finalizado)
+        // Sus propias solicitudes activas (oferta_aceptada, en_progreso, finalizado, completado)
         List<Solicitud.EstadoSolicitud> estadosPropios = List.of(
             Solicitud.EstadoSolicitud.oferta_aceptada,
             Solicitud.EstadoSolicitud.en_progreso,
-            Solicitud.EstadoSolicitud.finalizado
+            Solicitud.EstadoSolicitud.finalizado,
+            Solicitud.EstadoSolicitud.completado
         );
 
         List<Solicitud> solicitudesPropias = solicitudRepository
